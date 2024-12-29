@@ -1,0 +1,9 @@
+version: 0.1.0
+
+# Global settings
+global:
+
+# HTTP Server Configuration
+http:
+  port: # Port to listen to.
+  prefix: # Prefix for the API. Default: ""

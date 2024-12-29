@@ -1,0 +1,12 @@
+services:
+  service:
+    image: serivce:${TAG:-latest}
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+        max-file: "20"
