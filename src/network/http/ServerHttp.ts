@@ -16,11 +16,14 @@ export class ServerHttp {
   }
 
   private setup() {
-    this._app.use(swagger()).onError(({ error, code }) => {
-      if (code === "NOT_FOUND") return "Not Found";
+    this._app
+      .use(swagger())
+      .onError(({ error, code }) => {
+        if (code === "NOT_FOUND") return "Not Found";
 
-      console.error(error);
-    });
+        console.error(error);
+      }) // Health check endpoint
+      .get("/health", () => ({ status: "ok" }));
   }
 
   get app() {
@@ -30,6 +33,7 @@ export class ServerHttp {
   listen() {
     return this._app.listen(this.port, (server) => {
       logger.info(`Server http listening on ${server.hostname}:${server.port}...`);
+      logger.info(`See http://localhost:${server.port}/swagger to explore the API`);
     });
   }
 

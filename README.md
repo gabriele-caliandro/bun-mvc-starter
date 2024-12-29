@@ -10,10 +10,7 @@ A production-ready starter template for Bun + TypeScript projects with pre-confi
 - ⚙️ YAML config management with Zod validation
 - 🌐 HTTP server with Elysia
 - 🔒 Environment variables management
-- 🧪 Testing setup with Bun test
 - 📏 ESLint + Prettier
-- 🔄 GitHub Actions CI setup
-- 📂 Production-ready folder structure
 
 ## Quick Start
 
@@ -30,29 +27,17 @@ A production-ready starter template for Bun + TypeScript projects with pre-confi
    ```
 5. Run development server:
    ```bash
-   bun dev
+   bun run dev
    ```
 ****
 ## Scripts
 
-	<!-- "scripts": {
-		"dev": "bun src/main.ts",
-		"dev-watch": "bun --watch src/main.ts",
-		"lint": "tsc",
-		"build": "bun build src/main.ts --target bun --outdir ./dist",
-		"start": "NODE_ENV=production bun dist/index.js"
-	}, -->
-
 - `bun run dev` - Start development server
 - `bun run dev-watch` - Start development server with watch mode
-- `bun test:watch` - Run tests in watch mode
-- `bun lint` - Run `tsc` and `eslint`
-- `bun format` - Run Prettier
-- `bun type-check` - Run TypeScript type checking
-
-## Project Structure
-
-[Project structure tree from above]
+- `bun run lint` - Run `tsc` and `eslint`
+- `bun run format` - Format code with `prettier`
+- `bun run build` - Build production bundle
+- `bun run start` - Start production bundle
 
 ## Configuration
 

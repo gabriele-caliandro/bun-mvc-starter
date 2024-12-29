@@ -107,6 +107,8 @@ web_modules/
 .env.production.local
 .env.local
 
+config.yaml
+
 # parcel-bundler cache (https://parceljs.org/)
 
 .parcel-cache

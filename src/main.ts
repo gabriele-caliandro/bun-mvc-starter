@@ -11,6 +11,7 @@ const configFilePath = join(ROOT_DIR, "config.yaml");
 const configFile = Bun.file(configFilePath);
 const text = await configFile.text();
 export const config = await ConfigManager.init(text);
+
 async function main() {
   const logger = await LoggerManager.createLogger();
 
@@ -22,9 +23,12 @@ async function main() {
 
   logger.info(`Loaded configuration: ${configFilePath}`, { config });
 
-  const serverHttp = new ServerHttp(config.http.port, config.http.prefix);
+  const DEFAULT_PORT = 8080;
+  const DEFAULT_PREFIX = "";
+  const serverHttp = new ServerHttp(config.http.port ?? DEFAULT_PORT, config.http.prefix ?? DEFAULT_PREFIX);
   const model = new Model(["foo", "bar"]);
   const controller = new Controller(model, serverHttp);
+
   try {
     await controller.init();
   } catch (err) {

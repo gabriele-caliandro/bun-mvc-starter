@@ -8,7 +8,7 @@
 		"lint": "tsc && eslint src",
 		"format": "prettier src --write",
 		"build": "bun build src/main.ts --target bun --outdir ./dist",
-		"start": "NODE_ENV=production bun dist/index.js"
+		"start": "NODE_ENV=production bun dist/main.js"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",

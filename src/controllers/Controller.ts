@@ -32,9 +32,6 @@ export class Controller {
   private setupHttpRoutes() {
     logger.info("Setupping routes for http server");
 
-    // Health check endpoint
-    this.http.app.get("/health", () => ({ status: "ok" }));
-
     // Group model-related endpoints under /api
     this.http.app.group(this.http.prefix, (app) => app.use(name(this.model)));
   }

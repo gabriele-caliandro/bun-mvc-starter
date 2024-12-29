@@ -2,10 +2,10 @@ import yaml from "yaml";
 import { z } from "zod";
 
 // Global Config Schema
-const GlobalConfigSchema = z.object({});
+const GlobalConfigSchema = z.object({}).nullish();
 const HttpConfigSchema = z.object({
-  port: z.number(),
-  prefix: z.string(),
+  port: z.number().nullish(),
+  prefix: z.string().nullish(),
 });
 
 // Main Config Schema
