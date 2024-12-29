@@ -1,6 +1,7 @@
 {
 	"name": "bun-ts-starter",
 	"module": "src/main.ts",
+	"version": "v",
 	"type": "module",
 	"scripts": {
 		"dev": "bun src/main.ts",
