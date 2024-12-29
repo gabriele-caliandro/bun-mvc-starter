@@ -7,6 +7,6 @@ import winston from "winston";
  * @see @type {import('@/utils/logger/LoggerManager').LoggerManager}
  */
 export interface EnhancedLogger extends winston.Logger {
-	breakLine(): void;
-	spacer(char: string, lvl?: LogLevel, length?: number): void;
+  breakLine(): void;
+  spacer(char: string, lvl?: LogLevel, length?: number): void;
 }

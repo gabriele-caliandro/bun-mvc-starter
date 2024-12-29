@@ -5,21 +5,29 @@
 	"scripts": {
 		"dev": "bun src/main.ts",
 		"dev-watch": "bun --watch src/main.ts",
-		"lint": "tsc",
+		"lint": "tsc && eslint src",
+		"format": "prettier src --write",
 		"build": "bun build src/main.ts --target bun --outdir ./dist",
 		"start": "NODE_ENV=production bun dist/index.js"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",
-		"bun-types": "^1.1.38"
+		"@types/eslint": "^9.6.1",
+		"@typescript-eslint/parser": "^8.18.2",
+		"bun-types": "^1.1.38",
+		"prettier": "3.4.2",
+		"prettier-plugin-tailwindcss": "^0.6.6"
 	},
 	"peerDependencies": {
-		"typescript": "^5.0.0"
+		"typescript": "^5.7.2"
 	},
 	"dependencies": {
 		"@elysiajs/swagger": "^1.1.6",
+		"@eslint/js": "^9.17.0",
 		"date-fns": "^4.1.0",
 		"elysia": "^1.1.26",
+		"eslint": "^9.17.0",
+		"typescript-eslint": "^8.18.2",
 		"winston": "^3.17.0",
 		"winston-daily-rotate-file": "^5.0.0",
 		"yaml": "^2.6.1",
