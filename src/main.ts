@@ -1,3 +1,4 @@
+import { CommandLineConfig } from "@/configs/CommandLineConfig";
 import { ConfigManager } from "@/configs/ConfigManager";
 import { Controller } from "@/controllers/Controller";
 import { Model } from "@/models/Model";
@@ -13,6 +14,12 @@ const text = await configFile.text();
 export const config = await ConfigManager.init(text);
 
 async function main() {
+  // Check if help flag is set
+  if (CommandLineConfig.instance.help) {
+    const msg = CommandLineConfig.instance.helpMessage();
+    console.log(msg);
+    process.exit(0);
+  }
   const logger = await LoggerManager.createLogger();
 
   logger.breakLine();

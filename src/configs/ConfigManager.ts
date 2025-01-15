@@ -1,3 +1,4 @@
+import { CommandLineConfig } from "@/configs/CommandLineConfig";
 import yaml from "yaml";
 import { z } from "zod";
 
@@ -34,6 +35,22 @@ export class ConfigManager {
 
     res = ConfigSchema.parse(config) as Config;
 
+    res = ConfigManager.injectCommandLineArguments(res);
+
     return res;
+  }
+
+  /**
+   * Injects command line arguments into the config object overriding any existing values
+   * @param config
+   */
+  private static injectCommandLineArguments(config: Config): Config {
+    const commandLineConfig = CommandLineConfig.instance;
+
+    if (commandLineConfig.example) {
+      /* Set example config */
+    }
+
+    return config;
   }
 }
