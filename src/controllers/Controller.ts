@@ -1,4 +1,5 @@
 import name from "@/api/v1/name/[id]";
+import { RouteManager } from "@/controllers/RouteManager";
 import type { Model } from "@/models/Model";
 import type { ServerHttp } from "@/network/http/ServerHttp";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
@@ -20,7 +21,7 @@ export class Controller {
   async init() {
     logger.info("Initializing controller...");
 
-    this.setupHttpRoutes();
+    RouteManager.setupRoutes(this.http, this.model);
   }
 
   async run() {
