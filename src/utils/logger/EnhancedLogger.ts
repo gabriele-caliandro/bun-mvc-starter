@@ -9,4 +9,6 @@ import winston from "winston";
 export interface EnhancedLogger extends winston.Logger {
   breakLine(): void;
   spacer(char: string, lvl?: LogLevel, length?: number): void;
+  logPhase(logger: EnhancedLogger, phase: string): void;
+  logEndPhase(logger: EnhancedLogger, phase: string): void;
 }

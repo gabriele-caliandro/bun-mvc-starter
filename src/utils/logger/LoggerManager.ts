@@ -29,7 +29,6 @@ export type LogLevel = keyof typeof logLevels;
  * // [2023-03-01 12:34:56.789] [INFO] [logaut-interface-pacobot] Hello, world!
  */
 export class LoggerManager {
-  private static instance: LoggerManager | null = null;
   private static logsDir: string = "logs";
   private static readonly DEFAULT_SERVICE = "logaut-interface-pacobot";
 
@@ -88,6 +87,20 @@ export class LoggerManager {
         noService: true,
         noLvl: true,
       });
+    };
+    l.logPhase = (logger: EnhancedLogger, phase: string) => {
+      logger.breakLine();
+      logger.spacer("=");
+      logger.info(`"[START]" PHASE: ${phase}`);
+      logger.spacer("=");
+      logger.breakLine();
+    };
+    l.logEndPhase = (logger: EnhancedLogger, phase: string) => {
+      logger.breakLine();
+      logger.spacer("=");
+      logger.info(`"[END]" PHASE: ${phase}`);
+      logger.spacer("=");
+      logger.breakLine();
     };
 
     return l;
