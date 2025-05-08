@@ -5,6 +5,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./logs:/app/logs
+      - ./config.yaml:/app/config.yaml
     logging:
       driver: "local"
       options:

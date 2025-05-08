@@ -6,7 +6,7 @@ import { UserManager } from "@/interfaces/user-manager/UserManager";
 import { Model } from "@/models/Model";
 import { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
-import path, { join } from "path";
+import { join } from "path";
 
 const _dirname =
   import.meta.dir.startsWith("/$bunfs/root") || import.meta.dir.startsWith("B:\\~BUN\\root") ? `${process.execPath}/..` : import.meta.dir;
@@ -33,7 +33,7 @@ async function main() {
 
   logger.info(`Loaded configuration: ${configFilePath}`, { config });
 
-  const DEFAULT_PORT = 8080;
+  const DEFAULT_PORT = 3000;
   const DEFAULT_PREFIX = "";
   const serverHttp = new BaseHttpServer(config.http.port ?? DEFAULT_PORT, config.http.prefix ?? DEFAULT_PREFIX);
 

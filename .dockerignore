@@ -1,0 +1,30 @@
+# git
+.git
+.gitignore
+.github
+
+# vscode
+.vscode
+
+# docker
+docker-compose.yaml
+docker-compose.yml
+compose.template.yaml
+compose.template.yml
+compose.yaml
+compose.yml
+Dockerfile
+
+# config
+config.template.yaml
+config.yaml
+
+# build
+build
+dist
+out
+output
+generated
+
+# logs
+logs

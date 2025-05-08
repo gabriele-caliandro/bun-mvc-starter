@@ -1,0 +1,14 @@
+services:
+  service:
+    image: testerino
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+      - ./config.yaml:/app/config.yaml
+    ports:
+      - "3000:3000"
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+        max-file: "20"
