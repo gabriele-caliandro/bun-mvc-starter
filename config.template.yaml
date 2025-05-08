@@ -7,3 +7,15 @@ global:
 http:
   port: # Port to listen to.
   prefix: # Prefix for the API. Default: ""
+
+# User Manager Configuration
+userManager:
+  url: # URL of the user manager
+
+# Database Configuration
+database:
+  host: # Host of the database
+  port: # Port of the database
+  database: # Database name
+  username: # Username to connect to the database
+  password: # Password to connect to the database

@@ -9,11 +9,24 @@ const HttpConfigSchema = z.object({
   prefix: z.string().nullish(),
 });
 
+const HttpClientSchema = z.object({
+  url: z.string(),
+});
+const DatabaseConfigSchema = z.object({
+  host: z.string(),
+  port: z.number(),
+  database: z.string(),
+  username: z.string(),
+  password: z.string(),
+});
+
 // Main Config Schema
 const ConfigSchema = z.object({
   version: z.string(),
   global: GlobalConfigSchema,
   http: HttpConfigSchema,
+  userManager: HttpClientSchema,
+  database: DatabaseConfigSchema,
 });
 
 // Type inference
