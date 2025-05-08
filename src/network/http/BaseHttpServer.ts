@@ -7,7 +7,7 @@ import { Elysia } from "elysia";
 
 const logger = await LoggerManager.createLogger({ service: "http-server" });
 export class BaseHttpServer {
-  private _app: Elysia;
+  public _app: Elysia;
   public readonly prefix: string;
   public readonly port: number;
 
@@ -32,16 +32,25 @@ export class BaseHttpServer {
             },
             tags: Object.values(TAGS),
           },
-        })
+        }),
       )
       .onTransform(function log({ body, params, path, query, request: { method } }) {
         const queryParams = Object.entries(query)
           .map(([key, value]) => `${key}=${value}`)
           .join("&");
-        logger.info(`${method} ${path}${queryParams !== "" ? `?${queryParams}` : ""}`, {
-          body: method !== "GET" ? body : undefined,
-          params,
-        });
+
+        const details: Record<string, unknown> = {};
+        if (method !== "GET" && body !== undefined) {
+          details.body = body;
+        }
+        if (params) {
+          details.params = params;
+        }
+
+        logger.info(
+          `${method} ${path}${queryParams !== "" ? `?${queryParams}` : ""}`,
+          Object.keys(details).length !== 0 ? { details } : undefined,
+        );
       })
       .onError(({ error, code }) => {
         if (code === "NOT_FOUND") return "Not Found";
