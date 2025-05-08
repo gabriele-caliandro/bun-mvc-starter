@@ -58,11 +58,11 @@ export class BaseHttpClient implements BaseHttpClientI {
         headers: this.defaultHeaders,
         bodySize: body ? JSON.stringify(body).length : 0,
       });
-      
+
       const startTime = Date.now();
       const response = await fetch(url.toString(), options);
       const duration = Date.now() - startTime;
-      
+
       // Handle error responses
       if (!response.ok) {
         const errorText = await response.text();

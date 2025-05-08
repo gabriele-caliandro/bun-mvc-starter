@@ -17,7 +17,7 @@ const consoleFormat = winston.format.combine(
       error: "red",
       debug: "blue",
     },
-  }),
+  })
 );
 
 /**
@@ -28,7 +28,7 @@ const prettyFileFormat = winston.format.combine(
   // winston.format.align(),
   winston.format.errors({ stack: true }),
   ensureErrorStack(),
-  baseFormat(),
+  baseFormat()
 );
 
 export const formats = {

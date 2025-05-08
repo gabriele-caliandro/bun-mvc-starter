@@ -51,7 +51,7 @@ const name = (model: Model, serviceRegistry: ServiceRegistry) =>
           summary: "Get name by Id",
           tags: [TAGS.OPEN_API_TAG.name],
         },
-      },
+      }
     );
 
 export default name;

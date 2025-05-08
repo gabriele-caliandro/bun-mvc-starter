@@ -14,7 +14,7 @@ export class Controller {
   constructor(
     private model: Model,
     private httpServer: BaseHttpServer,
-    private serviceRegistry: ServiceRegistry,
+    private serviceRegistry: ServiceRegistry
   ) {}
 
   /**

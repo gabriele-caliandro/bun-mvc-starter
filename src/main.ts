@@ -42,7 +42,7 @@ async function main() {
     config.database.port,
     config.database.database,
     config.database.username,
-    config.database.password,
+    config.database.password
   );
   const userManger = new UserManager(config.userManager.url, "user-manager");
 

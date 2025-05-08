@@ -32,7 +32,7 @@ export class BaseHttpServer {
             },
             tags: Object.values(TAGS),
           },
-        }),
+        })
       )
       .onTransform(function log({ body, params, path, query, request: { method } }) {
         const queryParams = Object.entries(query)
