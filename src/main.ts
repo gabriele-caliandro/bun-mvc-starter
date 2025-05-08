@@ -1,8 +1,10 @@
 import { CommandLineConfig } from "@/configs/CommandLineConfig";
 import { ConfigManager } from "@/configs/ConfigManager";
 import { Controller } from "@/controllers/Controller";
+import { DatabaseManager } from "@/database/DatabaseManager";
+import { UserManager } from "@/interfaces/user-manager/UserManager";
 import { Model } from "@/models/Model";
-import { ServerHttp } from "@/network/http/ServerHttp";
+import { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import { join } from "path";
 
@@ -32,9 +34,22 @@ async function main() {
 
   const DEFAULT_PORT = 8080;
   const DEFAULT_PREFIX = "";
-  const serverHttp = new ServerHttp(config.http.port ?? DEFAULT_PORT, config.http.prefix ?? DEFAULT_PREFIX);
+  const serverHttp = new BaseHttpServer(config.http.port ?? DEFAULT_PORT, config.http.prefix ?? DEFAULT_PREFIX);
+
   const model = new Model(["foo", "bar"]);
-  const controller = new Controller(model, serverHttp);
+  const db = new DatabaseManager(
+    config.database.host,
+    config.database.port,
+    config.database.database,
+    config.database.username,
+    config.database.password,
+  );
+  const userManger = new UserManager(config.userManager.url, "user-manager");
+
+  const controller = new Controller(model, serverHttp, {
+    db,
+    userManger,
+  });
 
   try {
     await controller.init();

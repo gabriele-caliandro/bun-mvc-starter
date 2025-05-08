@@ -1,39 +1,62 @@
-import name from "@/api/v1/name/[id]";
 import { RouteManager } from "@/controllers/RouteManager";
+import type { DatabaseManager } from "@/database/DatabaseManager";
+import type { UserManagerI } from "@/interfaces/user-manager/UserManagerI";
 import type { Model } from "@/models/Model";
-import type { ServerHttp } from "@/network/http/ServerHttp";
+import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 
 const logger = await LoggerManager.createLogger({ service: "controller" });
+export type ServiceRegistry = {
+  db: DatabaseManager;
+  userManger: UserManagerI;
+};
 export class Controller {
-  private model: Model;
-  private http: ServerHttp;
-
-  constructor(model: Model, http: ServerHttp) {
-    this.model = model;
-    this.http = http;
-  }
+  constructor(
+    private model: Model,
+    private httpServer: BaseHttpServer,
+    private serviceRegistry: ServiceRegistry,
+  ) {}
 
   /**
-   * Initializes the controller by connecting to the OPC UA servers.
-   * Exception handling is left to the caller as this method is mandatory for the controller to run.
+   * Initializes the controller.
    */
   async init() {
     logger.info("Initializing controller...");
 
-    RouteManager.setupRoutes(this.http, this.model);
+    const setupDatabasePromise = this.initializeDatabase();
+    const setupHttpServerPromise = this.initializeHttpServer();
+    const setupModelPromise = this.initializeModel();
+
+    RouteManager.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
+    await Promise.all([setupDatabasePromise, setupHttpServerPromise, setupModelPromise]);
   }
 
   async run() {
     logger.info("Starting controller...");
 
-    this.http.listen();
+    this.httpServer.listen();
   }
 
-  private setupHttpRoutes() {
-    logger.info("Setupping routes for http server");
+  private async initializeDatabase() {
+    logger.info("Initializing database...");
+    return this.serviceRegistry.db.init();
+  }
 
-    // Group model-related endpoints under /api
-    this.http.app.group(this.http.prefix, (app) => app.use(name(this.model)));
+  private async initializeHttpServer() {
+    logger.info("Initializing server http...");
+    logger.info("Added swagger plugin to Elysia...");
+    logger.info(`Documentation available at ${this.httpServer.prefix}/doc`);
+
+    // Registering all the routes:
+    logger.info("Setup http routes...");
+    RouteManager.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
+  }
+
+  private async initializeModel() {
+    logger.info("Initializing model...");
+
+    // Create areas if they don't exist
+    const res = await this.serviceRegistry.db.drizzle.execute("SELECT 1 as test");
+    this.model.names.push(res.toString());
   }
 }
