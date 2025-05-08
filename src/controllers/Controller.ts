@@ -14,7 +14,7 @@ export class Controller {
   constructor(
     private model: Model,
     private httpServer: BaseHttpServer,
-    private serviceRegistry: ServiceRegistry
+    private serviceRegistry: ServiceRegistry,
   ) {}
 
   /**
@@ -28,7 +28,9 @@ export class Controller {
     const setupModelPromise = this.initializeModel();
 
     RouteManager.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
-    await Promise.all([setupDatabasePromise, setupHttpServerPromise, setupModelPromise]);
+    await Promise.all([setupDatabasePromise, setupHttpServerPromise, setupModelPromise]).catch((err) =>
+      logger.error("Error while initializing controller: ", err),
+    );
   }
 
   async run() {
@@ -44,8 +46,6 @@ export class Controller {
 
   private async initializeHttpServer() {
     logger.info("Initializing server http...");
-    logger.info("Added swagger plugin to Elysia...");
-    logger.info(`Documentation available at ${this.httpServer.prefix}/doc`);
 
     // Registering all the routes:
     logger.info("Setup http routes...");

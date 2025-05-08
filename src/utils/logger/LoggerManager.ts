@@ -30,7 +30,7 @@ export type LogLevel = keyof typeof logLevels;
  */
 export class LoggerManager {
   private static logsDir: string = "logs";
-  private static readonly DEFAULT_SERVICE = "logaut-interface-pacobot";
+  private static readonly DEFAULT_SERVICE = "";
 
   /**
    * Ensures the log directory exists and is writable.

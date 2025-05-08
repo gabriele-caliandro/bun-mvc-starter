@@ -6,11 +6,12 @@ import { UserManager } from "@/interfaces/user-manager/UserManager";
 import { Model } from "@/models/Model";
 import { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
-import { join } from "path";
+import path, { join } from "path";
 
-export const ROOT_DIR = import.meta.dir.replace("/src", "");
+const _dirname =
+  import.meta.dir.startsWith("/$bunfs/root") || import.meta.dir.startsWith("B:\\~BUN\\root") ? `${process.execPath}/..` : import.meta.dir;
 
-const configFilePath = join(ROOT_DIR, "config.yaml");
+const configFilePath = join(_dirname, "..", "config.yaml");
 const configFile = Bun.file(configFilePath);
 const text = await configFile.text();
 export const config = await ConfigManager.init(text);
@@ -42,7 +43,7 @@ async function main() {
     config.database.port,
     config.database.database,
     config.database.username,
-    config.database.password
+    config.database.password,
   );
   const userManger = new UserManager(config.userManager.url, "user-manager");
 
