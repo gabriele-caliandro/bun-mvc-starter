@@ -1,31 +1,35 @@
-# name: Docker Image CI
+name: Docker Image CI
 
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       version-tag:
-#         description: "Tag name for docker image"
-#         required: true
-#         type: string
-#   push:
-#     branches:
-#       - "[0-9]+.[0-9]+.[0-9]+*"
+on:
+  workflow_dispatch:
+    inputs:
+      version-tag:
+        description: "Tag name for docker image"
+        required: true
+        type: string
+  push:
+    branches:
+      - "[0-9]+.[0-9]+.[0-9]+*"
 
-# jobs:
-#   build:
-#     name: Build and push Docker image
-#     runs-on: [self-hosted, Linux, X64, orion]
-#     env:
-#       VERSION_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version-tag || github.ref_name }}
+jobs:
+  do-nothing:
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Nothing"
+  # build:
+  #   name: Build and push Docker image
+  #   runs-on: [self-hosted, Linux, X64, orion]
+  #   env:
+  #     VERSION_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version-tag || github.ref_name }}
 
-#     steps:
-#       - uses: actions/checkout@v4
-#       - name: Set up .env file
-#         run: echo "TAG_NAME=${{ env.VERSION_TAG }}" > .env
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Set up .env file
+  #       run: echo "TAG_NAME=${{ env.VERSION_TAG }}" > .env
 
-#       - name: Logging in to Docker Hub
-#         run: docker login -u ${{ vars.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
-#       - name: Build the Docker image
-#         run: docker build . -t clsimation/logaut-adapter-nemera-lyon:${{ env.VERSION_TAG }}
-#       - name: Push the Docker image
-#         run: docker compose push
+  #     - name: Logging in to Docker Hub
+  #       run: docker login -u ${{ vars.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
+  #     - name: Build the Docker image
+  #       run: docker build . -t clsimation/logaut-adapter-nemera-lyon:${{ env.VERSION_TAG }}
+  #     - name: Push the Docker image
+  #       run: docker compose push
