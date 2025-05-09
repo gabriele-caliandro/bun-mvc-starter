@@ -55,7 +55,7 @@ export class BaseHttpServer {
       .onError(({ error, code }) => {
         if (code === "NOT_FOUND") return "Not Found";
 
-        logger.error({ error });
+        logger.error("", { error });
       }) // Health check endpoint
       .get("/health", () => ({ status: "ok" }));
   }
