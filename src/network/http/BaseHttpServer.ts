@@ -1,3 +1,4 @@
+import { loggerMiddleware } from "@/network/http/middlewares/logger.middleware";
 import { TAGS } from "@/network/http/tags";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import { version } from "@/version";
@@ -32,26 +33,9 @@ export class BaseHttpServer {
             },
             tags: Object.values(TAGS),
           },
-        }),
+        })
       )
-      .onTransform(function log({ body, params, path, query, request: { method } }) {
-        const queryParams = Object.entries(query)
-          .map(([key, value]) => `${key}=${value}`)
-          .join("&");
-
-        const details: Record<string, unknown> = {};
-        if (method !== "GET" && body !== undefined) {
-          details.body = body;
-        }
-        if (params) {
-          details.params = params;
-        }
-
-        logger.info(
-          `${method} ${path}${queryParams !== "" ? `?${queryParams}` : ""}`,
-          Object.keys(details).length !== 0 ? { details } : undefined,
-        );
-      })
+      .use(loggerMiddleware)
       .onError(({ error, code }) => {
         if (code === "NOT_FOUND") return "Not Found";
 
