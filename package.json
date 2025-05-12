@@ -10,7 +10,8 @@
     "format": "prettier src --write",
     "build": "bun build src/main.ts --target bun --outdir ./dist",
     "build-binary": "bun build --compile --sourcemap --minify-whitespace --minify-syntax --target bun --outfile build/server src/main.ts",
-    "start": "NODE_ENV=production bun dist/main.js"
+    "start": "NODE_ENV=production bun dist/main.js",
+    "start-binary": "./build/server"
   },
   "devDependencies": {
     "@types/bun": "latest",
