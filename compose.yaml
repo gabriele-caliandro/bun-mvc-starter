@@ -1,12 +1,13 @@
 services:
   service:
-    image: testerino
+    image: gcaliandro/bun-mvc-starter
     restart: unless-stopped
+    build: .
     volumes:
       - ./logs:/app/logs
       - ./config.yaml:/app/config.yaml
     ports:
-      - "3000:3000"
+      - "8080:8080"
     logging:
       driver: "local"
       options:

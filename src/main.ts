@@ -35,7 +35,7 @@ async function main() {
 
   logger.info(`Loaded configuration: ${configFilePath}`, { config });
 
-  const DEFAULT_PORT = 3000;
+  const DEFAULT_PORT = 8080;
   const DEFAULT_PREFIX = "";
   const serverHttp = new BaseHttpServer(config.http.port ?? DEFAULT_PORT, config.http.prefix ?? DEFAULT_PREFIX);
 

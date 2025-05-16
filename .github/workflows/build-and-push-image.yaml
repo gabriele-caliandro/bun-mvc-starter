@@ -8,11 +8,11 @@ on:
         required: true
         type: string
   push:
-    branches:
-      - "**"
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+*"
 
 jobs:
-  build:
+  build-and-push:
     name: Build and push Docker image
     runs-on: [self-hosted, Linux, X64, orion]
 
@@ -20,12 +20,34 @@ jobs:
       VERSION_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version-tag || github.ref_name }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Get image name
+      - name: Get repository name without owner
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | sed 's/.*\///')
           echo REPO_NAME=$REPO_NAME >> $GITHUB_ENV
+
+      - name: Print trigger information
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Using version tag: ${{ env.VERSION_TAG }}"
+
+      - name: Setup Bunjs
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: bun i --silent
+
+      - name: Type checking
+        working-directory: ./frontend
+        run: bun run tsc
+
+      - name: Lint code
+        working-directory: ./frontend
+        run: bun run lint --quiet
 
       - name: Logging in to Docker Hub
         run: docker login -u ${{ vars.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
@@ -34,4 +56,4 @@ jobs:
         run: docker build . -t owner/${{ env.REPO_NAME }}:${{ env.VERSION_TAG }}
 
       - name: Push the Docker image
-        run: docker compose push
+        run: docker push owner/${{ env.REPO_NAME }}:${{ env.VERSION_TAG }}

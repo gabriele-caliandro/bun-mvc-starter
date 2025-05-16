@@ -15,4 +15,4 @@ WORKDIR /app
 COPY --from=build /app/build/server ./build/server
 ENV NODE_ENV=production
 CMD ["./build/server"]
-EXPOSE 3000
+EXPOSE 8080

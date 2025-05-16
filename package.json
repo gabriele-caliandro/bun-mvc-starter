@@ -1,5 +1,5 @@
 {
-  "name": "bun-ts-starter",
+  "name": "bun-mvc-starter",
   "module": "src/main.ts",
   "type": "module",
   "scripts": {
