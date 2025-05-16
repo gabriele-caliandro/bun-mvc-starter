@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Build & Push Docker image
 
 on:
   workflow_dispatch:
@@ -9,27 +9,29 @@ on:
         type: string
   push:
     branches:
-      - "[0-9]+.[0-9]+.[0-9]+*"
+      - "**"
 
 jobs:
-  do-nothing:
-    runs-on: ubuntu-22.04
+  build:
+    name: Build and push Docker image
+    runs-on: [self-hosted, Linux, X64, orion]
+
+    env:
+      VERSION_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version-tag || github.ref_name }}
+
     steps:
-      - run: echo "Nothing"
-  # build:
-  #   name: Build and push Docker image
-  #   runs-on: [self-hosted, Linux, X64, orion]
-  #   env:
-  #     VERSION_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version-tag || github.ref_name }}
+      - uses: actions/checkout@v4
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Set up .env file
-  #       run: echo "TAG_NAME=${{ env.VERSION_TAG }}" > .env
+      - name: Get image name
+        run: |
+          REPO_NAME=$(echo "${{ github.repository }}" | sed 's/.*\///')
+          echo REPO_NAME=$REPO_NAME >> $GITHUB_ENV
 
-  #     - name: Logging in to Docker Hub
-  #       run: docker login -u ${{ vars.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
-  #     - name: Build the Docker image
-  #       run: docker build . -t clsimation/logaut-adapter-nemera-lyon:${{ env.VERSION_TAG }}
-  #     - name: Push the Docker image
-  #       run: docker compose push
+      - name: Logging in to Docker Hub
+        run: docker login -u ${{ vars.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build the Docker image
+        run: docker build . -t owner/${{ env.REPO_NAME }}:${{ env.VERSION_TAG }}
+
+      - name: Push the Docker image
+        run: docker compose push
