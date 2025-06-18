@@ -6,6 +6,7 @@
     "dev": "bun src/main.ts",
     "dev-watch": "bun --watch src/main.ts",
     "tsc": "tsc",
+    "tsgo": "bunx tsgo",
     "lint": "eslint src",
     "format": "prettier src --write",
     "build": "bun build src/main.ts --target bun --outdir ./dist",
@@ -17,6 +18,7 @@
     "@types/bun": "latest",
     "@types/eslint": "^9.6.1",
     "@typescript-eslint/parser": "^8.18.2",
+    "@typescript/native-preview": "^7.0.0-dev.20250618.1",
     "bun-types": "^1.1.38",
     "prettier": "3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.6"
