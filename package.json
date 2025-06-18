@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/eslint": "^9.6.1",
+    "@types/mqtt": "^2.5.0",
     "@typescript-eslint/parser": "^8.18.2",
     "@typescript/native-preview": "^7.0.0-dev.20250618.1",
     "bun-types": "^1.1.38",
@@ -35,6 +36,7 @@
     "drizzle-orm": "^0.43.1",
     "elysia": "^1.1.26",
     "eslint": "^9.17.0",
+    "mqtt": "^5.13.1",
     "postgres": "^3.4.5",
     "typescript-eslint": "^8.18.2",
     "winston": "^3.17.0",
