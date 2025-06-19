@@ -1,6 +1,6 @@
 import type { BaseHttpClientI } from "@/network/http/BaseHttpClientI";
 import type { EnhancedLogger } from "@/utils/logger/EnhancedLogger";
-import { LoggerManager } from "@/utils/logger/LoggerManager";
+import { LoggerManager, type LogLevel } from "@/utils/logger/LoggerManager";
 
 /**
  * A generic HTTP client for making RESTful API calls with logging.
@@ -12,18 +12,18 @@ export class BaseHttpClient implements BaseHttpClientI {
 
   protected logger: EnhancedLogger | null = null;
 
-  constructor(baseURL: string, serviceName: string, defaultHeaders: HeadersInit = {}) {
+  constructor(baseURL: string, serviceName: string, defaultHeaders: HeadersInit = {}, opts?: { lvl?: LogLevel }) {
     this.baseURL = baseURL;
     this.serviceName = serviceName;
     this.defaultHeaders = {
       "Content-Type": "application/json",
       ...defaultHeaders,
     };
-    this.initLogger();
+    this.initLogger(opts?.lvl);
   }
 
-  private async initLogger() {
-    this.logger = await LoggerManager.createLogger({ service: this.serviceName });
+  private async initLogger(lvl: LogLevel = "info") {
+    this.logger = await LoggerManager.createLogger({ service: this.serviceName, lvl });
   }
 
   /**
@@ -57,6 +57,7 @@ export class BaseHttpClient implements BaseHttpClientI {
         url: url.toString(),
         headers: this.defaultHeaders,
         bodySize: body ? JSON.stringify(body).length : 0,
+        body: body,
       });
 
       const startTime = Date.now();
@@ -107,6 +108,8 @@ export class BaseHttpClient implements BaseHttpClientI {
           url: url.toString(),
           responseType: "json",
           dataSize: JSON.stringify(data).length,
+          status: response.status,
+          body: data,
         });
         return data;
       }
@@ -119,6 +122,8 @@ export class BaseHttpClient implements BaseHttpClientI {
           url: url.toString(),
           responseType: "text",
           dataSize: text.length,
+          status: response.status,
+          body: text,
         });
         return text as unknown as T;
       }
