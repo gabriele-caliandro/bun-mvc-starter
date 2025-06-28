@@ -7,7 +7,6 @@ const consoleFormat = winston.format.combine(
   timestampFormat(),
   // winston.format.align(),
   winston.format.errors({ stack: true }),
-  ensureErrorStack(),
   baseFormat(),
   winston.format.colorize({
     all: true,
@@ -27,7 +26,6 @@ const prettyFileFormat = winston.format.combine(
   timestampFormat(),
   // winston.format.align(),
   winston.format.errors({ stack: true }),
-  ensureErrorStack(),
   baseFormat()
 );
 
@@ -36,20 +34,6 @@ export const formats = {
   console: consoleFormat,
 };
 
-/**
- * In case a logger.error() was used without passing @type {Error} obj, force the creation of a stack trace
- */
-function ensureErrorStack() {
-  return winston.format((info) => {
-    if (info.level === "error") {
-      if (typeof info.message === "string" && !info.stack) {
-        const e = new Error(info.message);
-        info.stack = e.stack?.split("\n").slice(2).join("\n");
-      }
-    }
-    return info;
-  })();
-}
 function timestampFormat() {
   return winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" });
 }
