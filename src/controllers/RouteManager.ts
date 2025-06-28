@@ -1,4 +1,4 @@
-import name from "@/api/v1/name/[id]";
+import name from "@/api/v1/name/[id]/route";
 import type { ServiceRegistry } from "@/controllers/Controller";
 import type { Model } from "@/models/Model";
 import type { BaseHttpServer } from "@/network/http/BaseHttpServer";

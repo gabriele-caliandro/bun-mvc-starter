@@ -2,7 +2,9 @@ import type { ServiceRegistry } from "@/controllers/Controller";
 import type { Model } from "@/models/Model";
 import { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { TAGS } from "@/network/http/tags";
+import { Box } from "@sinclair/typebox-adapter";
 import Elysia, { t } from "elysia";
+import { z } from "zod";
 
 /**
  * This is an example of a route handler
@@ -14,7 +16,7 @@ const name = (model: Model, serviceRegistry: ServiceRegistry) =>
   new Elysia()
     .use(BaseHttpServer.modelPlugin(model))
     .use(BaseHttpServer.registerPlugin(serviceRegistry))
-    .get(
+    .post(
       "/name/:id",
       async ({ params: { id }, serviceRegistry, model, error }) => {
         // This is a mock implementation
@@ -34,6 +36,7 @@ const name = (model: Model, serviceRegistry: ServiceRegistry) =>
         };
       },
       {
+        body: Box(z.object({ name: z.string() })),
         response: {
           200: t.Object({
             user: t.Object({

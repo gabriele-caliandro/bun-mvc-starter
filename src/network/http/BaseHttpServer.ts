@@ -1,5 +1,6 @@
 import { loggerMiddleware } from "@/network/http/middlewares/logger.middleware";
 import { TAGS } from "@/network/http/tags";
+import { getErrorMessage } from "@/utils/get-error-message";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import { version } from "@/version";
 import cors from "@elysiajs/cors";
@@ -39,7 +40,7 @@ export class BaseHttpServer {
       .onError(({ error, code }) => {
         if (code === "NOT_FOUND") return "Not Found";
 
-        logger.error("", { error });
+        logger.error(`Unexpected error: ${getErrorMessage(error)}`);
       }) // Health check endpoint
       .get("/health", () => ({ status: "ok" }));
   }
@@ -47,7 +48,7 @@ export class BaseHttpServer {
   get app() {
     return this._app;
   }
-
+  
   listen() {
     return this._app.listen(this.port, (server) => {
       logger.info(`Server http listening on ${server.hostname}:${server.port}...`);

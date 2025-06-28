@@ -14,7 +14,7 @@ export class Controller {
   constructor(
     private model: Model,
     private httpServer: BaseHttpServer,
-    private serviceRegistry: ServiceRegistry,
+    private serviceRegistry: ServiceRegistry
   ) {}
 
   /**
@@ -29,7 +29,7 @@ export class Controller {
 
     RouteManager.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
     await Promise.all([setupDatabasePromise, setupHttpServerPromise, setupModelPromise]).catch((err) =>
-      logger.error("Error while initializing controller: ", err),
+      logger.error("Error while initializing controller: ", err)
     );
   }
 

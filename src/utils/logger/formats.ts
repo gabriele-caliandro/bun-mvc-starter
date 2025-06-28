@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@/utils/get-error-message";
 import winston from "winston";
 
 /**
@@ -43,7 +44,7 @@ function timestampFormat() {
  * @returns
  */
 function baseFormat() {
-  return winston.format.printf(({ timestamp, level, message, service, stack, ...metadata }) => {
+  return winston.format.printf(({ timestamp, level, message, service, err, error, prefixes, ...metadata }) => {
     // Remove internal winston metadata
     const cleanMetadata = filterMetadata(metadata);
 
@@ -65,16 +66,26 @@ function baseFormat() {
       logString += `\n${JSON.stringify(cleanMetadata, null, 2)}`;
     }
 
-    // Add stack trace for errors if present
-    if (stack && ["error", "warn"].includes(level)) {
-      logString += `\n${stack}`;
+    if (prefixes !== undefined && prefixes !== null) {
+      try {
+        logString += (prefixes as string[]).map((prefix) => `[${prefix}] `).join("");
+      } catch (_) {
+        /* empty */
+      }
+    }
+
+    if (err) {
+      logString += `\n${getErrorMessage(err)}`;
+    }
+    if (error) {
+      logString += `\n${getErrorMessage(err)}`;
     }
 
     return logString;
   });
 }
 
-function filterMetadata(metadata: Record<string, any>): Record<string, any> {
-  const keysToRemove = ["label", "originalLine", "originalColumn", "noTimestamp", "noLvl", "noService"];
+function filterMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
+  const keysToRemove = ["label", "originalLine", "originalColumn", "noTimestamp", "noLvl", "noService", "stack"];
   return Object.fromEntries(Object.entries(metadata).filter(([key]) => !keysToRemove.includes(key)));
 }
