@@ -1,7 +1,6 @@
 import EventEmitter from "events";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type EventMap = Record<string, any>;
+type EventMap = Record<string, unknown>;
 /**
  * Example:
  * type EventMap = {

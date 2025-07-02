@@ -5,7 +5,7 @@ http:
 
 mqtt:
   url: "mqtt://localhost:1883" # URL of the MQTT broker
-
+MQTT error
 # User Manager Configuration
 userManager:
   url: # URL of the user manager

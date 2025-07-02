@@ -14,7 +14,7 @@ function toErrorWithMessage(maybeError: unknown): ErrorWithMessage {
   }
 
   try {
-    const jsonString = JSON.stringify(maybeError);
+    const jsonString = JSON.stringify(maybeError, null, 2);
     console.log(jsonString);
     return new Error(jsonString);
   } catch {

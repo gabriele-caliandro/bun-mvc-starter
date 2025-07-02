@@ -1,11 +1,23 @@
 services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883" # MQTT port
+      - "9001:9001" # WebSocket port
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
+    networks:
+      - mqtt-network
+
   service:
     image: serivce:${TAG:-latest}
     build: .
     restart: unless-stopped
     volumes:
       - ./logs:/app/logs
-      - ./config.yaml:/app/config.yaml
+      - ./config/config.yaml:/app/config/config.yaml
     logging:
       driver: "local"
       options:
