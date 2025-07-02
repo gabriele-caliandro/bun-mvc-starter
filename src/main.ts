@@ -1,5 +1,4 @@
-import { CommandLineConfig } from "@/configs/CommandLineConfig";
-import { ConfigManager } from "@/configs/ConfigManager";
+import { ConfigLoader } from "@/configs/ConfigLoader";
 import { Controller } from "@/controllers/Controller";
 import { DatabaseManager } from "@/database/DatabaseManager";
 import { UserManager } from "@/interfaces/user-manager/UserManager";
@@ -8,23 +7,14 @@ import { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import { join } from "path";
 
+// Gets the root directory of the project. Checks if it's in production or development mode.
 export const _rootdir =
   import.meta.dir.startsWith("/$bunfs/root") || import.meta.dir.startsWith("B:\\~BUN\\root")
     ? join(process.execPath, "..", "..")
     : join(import.meta.dir, "..");
 
-const configFilePath = join(_rootdir, "config.yaml");
-const configFile = Bun.file(configFilePath);
-const text = await configFile.text();
-export const config = await ConfigManager.init(text);
-
+export const config = await ConfigLoader.load();
 async function main() {
-  // Check if help flag is set
-  if (CommandLineConfig.instance.help) {
-    const msg = CommandLineConfig.instance.helpMessage();
-    console.log(msg);
-    process.exit(0);
-  }
   const logger = await LoggerManager.createLogger();
 
   logger.breakLine();
@@ -33,7 +23,7 @@ async function main() {
   logger.spacer("=");
   logger.breakLine();
 
-  logger.info(`Loaded configuration: ${configFilePath}`, { config });
+  logger.info(`Loaded configuration:`, { config });
 
   const DEFAULT_PORT = 8080;
   const DEFAULT_PREFIX = "";

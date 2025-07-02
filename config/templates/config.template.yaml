@@ -1,12 +1,10 @@
-version: 0.1.0
-
-# Global settings
-global:
-
 # HTTP Server Configuration
 http:
   port: # Port to listen to.
   prefix: # Prefix for the API. Default: ""
+
+mqtt:
+  url: "mqtt://localhost:1883" # URL of the MQTT broker
 
 # User Manager Configuration
 userManager:
