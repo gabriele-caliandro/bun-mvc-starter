@@ -1,9 +1,10 @@
 import { ConfigLoader } from "@/configs/ConfigLoader";
 import { Controller } from "@/controllers/Controller";
 import { DatabaseManager } from "@/database/DatabaseManager";
-import { UserManager } from "@/interfaces/user-manager/UserManager";
+import { UserManagerHttpClient } from "@/interfaces/user-manager/UserManagerHttpClient";
 import { Model } from "@/models/Model";
 import { BaseHttpServer } from "@/network/http/BaseHttpServer";
+import { BaseMqttClient } from "@/network/mqtt/BaseMqttClient";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import { join } from "path";
 
@@ -17,9 +18,11 @@ export const config = await ConfigLoader.load();
 async function main() {
   const logger = await LoggerManager.createLogger();
 
+  const service = "replace-name";
+
   logger.breakLine();
   logger.spacer("=");
-  logger.info(` ***REPLACE_NAME*** v${config.version} started`);
+  logger.info(` ***${service}*** v${config.version} started`);
   logger.spacer("=");
   logger.breakLine();
 
@@ -37,11 +40,14 @@ async function main() {
     config.database.username,
     config.database.password
   );
-  const userManger = new UserManager(config.userManager.url, "user-manager");
+  const mqtt = new BaseMqttClient(service, config.mqtt.url);
+
+  const userManger = new UserManagerHttpClient(config["user-manager-http-server"].url, "user-manager");
 
   const controller = new Controller(model, serverHttp, {
     db,
     userManger,
+    mqtt,
   });
 
   try {

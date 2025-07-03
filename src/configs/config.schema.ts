@@ -5,7 +5,7 @@ const HttpConfigSchema = z.object({
   prefix: z.string().nullish(),
 });
 
-const HttpClientSchema = z.object({
+const HttpSererSchema = z.object({
   url: z.string(),
 });
 const DatabaseConfigSchema = z.object({
@@ -25,7 +25,7 @@ const ConfigSchema = z.object({
   mqtt: MqttConfigSchema,
   http: HttpConfigSchema,
   database: DatabaseConfigSchema,
-  userManager: HttpClientSchema,
+  "user-manager-http-server": HttpSererSchema,
 });
 export default ConfigSchema;
 

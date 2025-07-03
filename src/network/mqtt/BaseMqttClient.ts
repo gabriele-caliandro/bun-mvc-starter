@@ -1,15 +1,16 @@
+import type { BaseMqttClientI } from "@/network/mqtt/BaseMqttClientI";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import mqtt, { type ISubscriptionGrant, type MqttClient, type PacketCallback } from "mqtt";
 
 export type QoS = 0 | 1 | 2;
 const logger = await LoggerManager.createLogger({ service: "mqtt" });
 
-export class BaseMqttClient<T extends Record<string, unknown> = Record<string, unknown>> {
+export class BaseMqttClient<T extends Record<string, unknown> = Record<string, unknown>> implements BaseMqttClientI<T> {
   private client: MqttClient | null = null;
 
   private reconnectAttempts = 0;
   private reconnectPeriod = 3000;
-  private maxReconnectAttempts = 99999;
+  private maxReconnectAttempts = 2;
 
   private messageHandlers = new Map<keyof T, Array<(message: T[keyof T]) => void>>();
 
@@ -25,7 +26,6 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
           reconnectPeriod: this.reconnectPeriod,
           connectTimeout: 60_000,
           clientId: this.clientId,
-          // reconnectOnConnackError: true,
         });
 
         // Wait for actual connection before resolving
@@ -38,7 +38,9 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
         this.client.on("error", (error) => {
           logger.error("MQTT error:", error);
           logger.warn(`Retring to connect to MQTT broker in ${this.reconnectPeriod}ms`);
-          if (this.reconnectAttempts === this.maxReconnectAttempts) {
+          if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            logger.error(`Max reconnection attempts (${this.maxReconnectAttempts}) reached`);
+            this.client?.end(true);
             reject(error); // Fail fast on connection errors
           }
         });
@@ -46,13 +48,7 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
         // Handle reconnection attempts
         this.client.on("reconnect", () => {
           this.reconnectAttempts++;
-          logger.info(`Reconnecting to MQTT broker (attempt ${this.reconnectAttempts} / ${this.maxReconnectAttempts})`);
-
-          // Stop after max attempts
-          if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-            logger.error(`Max reconnection attempts (${this.maxReconnectAttempts}) reached`);
-            this.client?.end(true);
-          }
+          logger.info(`Reconnected to MQTT broker (attempt ${this.reconnectAttempts} / ${this.maxReconnectAttempts})`);
         });
 
         this.client.on("close", () => {
@@ -93,9 +89,10 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
     }
   }
 
-  async publish<K extends keyof T>(topic: K, message: T[K]): Promise<void> {
+  async publish<K extends keyof T>(topic: K, message: T[K], opts: { qos: QoS } = { qos: 0 }): Promise<void> {
     if (!this.client) throw new Error("Not connected");
-    this.client.publish(topic.toString(), JSON.stringify(message));
+
+    this.client.publish(topic.toString(), JSON.stringify(message), { qos: opts.qos });
   }
 
   async subscribe(topic: keyof T, callback?: (granted: ISubscriptionGrant[]) => void, opts: { qos: QoS } = { qos: 0 }): Promise<void> {
@@ -119,7 +116,7 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
     if (!this.messageHandlers.has(topic)) {
       logger.warn(`Client not subscribed to topic '${topic.toString()}' yet. Autosubscribing topic '${topic.toString()}'`);
       this.messageHandlers.set(topic, []);
-      this.client?.subscribe(topic.toString());
+      this.subscribe(topic.toString());
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.messageHandlers.get(topic)!.push(handler as any);
@@ -140,5 +137,9 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
   async disconnect(): Promise<void> {
     this.messageHandlers.clear();
     this.client?.end();
+  }
+
+  get isConnected(): boolean {
+    return this.client?.connected ?? false;
   }
 }

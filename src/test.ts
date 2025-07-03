@@ -8,16 +8,10 @@ type TopicMap = {
 const mqttClient = new BaseMqttClient<TopicMap>("test-id", "mqtt://localhost:1883");
 await mqttClient.connect();
 
-await mqttClient.subscribe("alerts/critical");
-await mqttClient.subscribe("devices/status");
 
-mqttClient.onMessage("devices/status", (message) => {
-  console.log(`Handler 1 received message:`, message.deviceId);
-});
-mqttClient.onMessage("alerts/critical", (message) => {
-  console.log(`Handler 2 received message:`, message);
-});
-
+setInterval(() => {
+  mqttClient.publish("alerts/critical", { message: "Critical alert!" }, { qos: 2 });
+}, 5000);
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

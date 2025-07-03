@@ -5,9 +5,9 @@ http:
 
 mqtt:
   url: "mqtt://localhost:1883" # URL of the MQTT broker
-MQTT error
+
 # User Manager Configuration
-userManager:
+user-manager-http-server:
   url: # URL of the user manager
 
 # Database Configuration

@@ -5,7 +5,7 @@ import { BaseHttpClient } from "@/network/http/BaseHttpClient";
 /**
  * Example of a class that represents an implementation of an external http service
  */
-export class UserManager extends BaseHttpClient implements UserManagerI {
+export class UserManagerHttpClient extends BaseHttpClient implements UserManagerI {
   getUserById(id: string): Promise<UserDTO> {
     return this.get<UserDTO>(`/users/${id}`);
   }

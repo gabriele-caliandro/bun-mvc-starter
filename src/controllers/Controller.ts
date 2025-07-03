@@ -3,12 +3,14 @@ import type { DatabaseManager } from "@/database/DatabaseManager";
 import type { UserManagerI } from "@/interfaces/user-manager/UserManagerI";
 import type { Model } from "@/models/Model";
 import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
+import type { BaseMqttClientI } from "@/network/mqtt/BaseMqttClientI";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 
 const logger = await LoggerManager.createLogger({ service: "controller" });
 export type ServiceRegistry = {
   db: DatabaseManager;
   userManger: UserManagerI;
+  mqtt: BaseMqttClientI;
 };
 export class Controller {
   constructor(
