@@ -18,11 +18,14 @@
     "@types/bun": "latest",
     "@types/eslint": "^9.6.1",
     "@types/mqtt": "^2.5.0",
+    "@types/pg": "^8.15.4",
     "@typescript-eslint/parser": "^8.18.2",
     "@typescript/native-preview": "^7.0.0-dev.20250618.1",
     "bun-types": "^1.1.38",
+    "drizzle-kit": "^0.31.4",
     "prettier": "3.4.2",
-    "prettier-plugin-tailwindcss": "^0.6.6"
+    "prettier-plugin-tailwindcss": "^0.6.6",
+    "tsx": "^4.20.3"
   },
   "peerDependencies": {
     "typescript": "^5.7.2"
