@@ -8,6 +8,8 @@ services:
     volumes:
       - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
     restart: unless-stopped
+    networks:
+        - mqtt-broker
 
   service:
     image: serivce:${TAG:-latest}
@@ -38,3 +40,6 @@ services:
 
 volumes:
   postgres-data:
+
+networks:
+  mqtt-broker:

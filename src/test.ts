@@ -5,6 +5,7 @@ type TopicMap = {
   "sensors/temperature": TemperaturePayload;
   "devices/status": { deviceId: string };
   "alerts/critical": { message: string };
+  position: { x: string; y: string };
 };
 const mqttClient = new BaseMqttClient<TopicMap>("test-id", "mqtt://localhost:1883");
 await mqttClient.connect();
@@ -13,7 +14,9 @@ setInterval(() => {
   mqttClient.publish("alerts/critical", { message: "Critical alert!" }, { qos: 2 });
 }, 5000);
 
-mqttClient.onMessage("sensors/temperature", (payload) => {});
+mqttClient.onMessage("devices/status", (payload) => {
+  console.log("Received position update:", payload);
+});
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
