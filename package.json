@@ -25,9 +25,7 @@
     "drizzle-kit": "^0.31.4",
     "prettier": "3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.6",
-    "tsx": "^4.20.3"
-  },
-  "peerDependencies": {
+    "tsx": "^4.20.3",
     "typescript": "^5.7.2"
   },
   "dependencies": {
