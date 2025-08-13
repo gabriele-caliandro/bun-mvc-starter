@@ -1,9 +1,9 @@
-FROM oven/bun AS build
+FROM oven/bun:1.2.19-alpine AS build
 WORKDIR /app
 
 # Cache packages installation
 COPY package.json package.json
-COPY bun.lockb bun.lockb
+COPY bun.lock bun.lock
 RUN bun install
 COPY . .
 
