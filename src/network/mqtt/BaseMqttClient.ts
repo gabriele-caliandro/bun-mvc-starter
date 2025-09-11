@@ -3,7 +3,7 @@ import { LoggerManager } from "@/utils/logger/LoggerManager";
 import mqtt, { type ISubscriptionGrant, type MqttClient, type PacketCallback } from "mqtt";
 
 export type QoS = 0 | 1 | 2;
-const logger = await LoggerManager.createLogger({ service: "mqtt" });
+const logger = await LoggerManager.get_logger({ service: "mqtt" });
 
 export class BaseMqttClient<T extends Record<string, unknown> = Record<string, unknown>> implements BaseMqttClientI<T> {
   private client: MqttClient | null = null;

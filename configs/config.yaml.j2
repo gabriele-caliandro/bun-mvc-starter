@@ -1,0 +1,23 @@
+version: "{{ version | default('1.0.0') }}"
+
+test: {{ porca_miseria }}
+
+# HTTP Server Configuration  
+http:
+  port: {{ http_port | default(8080) }}
+  prefix: "{{ http_prefix | default('') }}"
+
+mqtt:
+  url: "{{ mqtt_url | default('mqtt://localhost:1883') }}"
+
+# user manager configuration
+user-manager-http-server:
+  url: "{{ user_manager_url | default('http://localhost:3000') }}"
+
+# Database Configuration
+database:
+  host: "{{ db_host | default('localhost') }}"
+  port: {{ db_port | default(5432) }}
+  database: "{{ db_name | default('postgres') }}"
+  username: "{{ db_username | default('admin') }}"
+  password: "{{ db_password | default('admin') }}"

@@ -1,19 +1,8 @@
-import type { EnhancedLogger } from "@/utils/logger/EnhancedLogger";
 import { formats } from "@/utils/logger/formats";
+import { type LogLevel, log_levels } from "@/utils/logger/log-levels";
 import { access, mkdir } from "node:fs/promises";
-import winston from "winston";
+import winston, { Logger } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
-import type { AbstractConfigSetLevels } from "winston/lib/winston/config";
-
-const logLevels = {
-  fatal: 0,
-  error: 1,
-  warn: 2,
-  info: 3,
-  debug: 4,
-  trace: 5,
-} as const satisfies AbstractConfigSetLevels;
-export type LogLevel = keyof typeof logLevels;
 
 /**
  * Creates a singleton logger instance with multiple transports.
@@ -22,24 +11,24 @@ export type LogLevel = keyof typeof logLevels;
  * - Console: logs are written to the console with colors
  *
  * Usage example:
- * const logger = await LoggerManager.createLogger();
+ * const logger = LoggerManager.createLogger();
  * logger.info("Hello, world!");
  *
  * // Output:
- * // [2023-03-01 12:34:56.789] [INFO] [logaut-interface-pacobot] Hello, world!
+ * // [2024-03-01 12:34:56.789] [INFO] [logaut-interface-pacobot] Hello, world!
  */
 export class LoggerManager {
-  private static logsDir: string = "logs";
-  private static readonly DEFAULT_SERVICE = "";
+  private static logs_dir: string = "logs";
+  private static loggers = new Map<string, Logger>();
 
   /**
    * Ensures the log directory exists and is writable.
    */
-  private static async ensureLogDir(): Promise<void> {
+  static async ensure_log_directory(): Promise<void> {
     try {
-      await access(this.logsDir);
+      await access(this.logs_dir);
     } catch {
-      await mkdir(this.logsDir, { recursive: true });
+      await mkdir(this.logs_dir, { recursive: true });
     }
   }
 
@@ -50,58 +39,38 @@ export class LoggerManager {
    * - DailyRotateFile: pretty logs are written to a file in the logs directory, named after the current date with _pretty suffix
    * - Console: logs are written to the console with colors
    */
-  static async createLogger(props?: { lvl?: LogLevel; service?: string }): Promise<EnhancedLogger> {
-    await LoggerManager.ensureLogDir();
+  static get_logger(params?: { lvl?: LogLevel; service?: string }): winston.Logger {
+    const service = params?.service ?? "";
+    if (!this.loggers.has(service)) {
+      const logger = LoggerManager.create_logger({ service });
+      this.loggers.set(service, logger);
+    }
+    return this.loggers.get(service)!;
+  }
 
+  private static create_logger(params?: { lvl?: LogLevel; service?: string }) {
     // Pretty formatted logs
-    const prettyFileRotateTransport = new DailyRotateFile({
-      dirname: LoggerManager.logsDir,
+    const pretty_file_rotate_transport = new DailyRotateFile({
+      dirname: LoggerManager.logs_dir,
       filename: "%DATE%.log",
       datePattern: "YYYY-MM-DD",
-      maxSize: "20m",
+      maxSize: "21m",
       format: formats.prettyFile,
     });
 
     // Console transport with colors
-    const consoleTransport = new winston.transports.Console({
+    const console_transport = new winston.transports.Console({
       format: formats.console,
     });
 
     const logger = winston.createLogger({
-      levels: logLevels,
-      level: props?.lvl ?? "info",
-      defaultMeta: { service: props?.service ?? LoggerManager.DEFAULT_SERVICE },
-      transports: [prettyFileRotateTransport, consoleTransport],
+      levels: log_levels,
+      level: params?.lvl ?? "info",
+      defaultMeta: { service: params?.service },
+      transports: [pretty_file_rotate_transport, console_transport],
     });
 
-    const l = logger.child({
-      service: LoggerManager.DEFAULT_SERVICE,
-    }) as EnhancedLogger;
-
-    l.breakLine = () => {
-      logger.info("", { noTimestamp: true, noService: true, noLvl: true });
-    };
-    l.spacer = (char, lvl = "info", length = 120) => {
-      logger.log(lvl, char.repeat(length), {
-        noTimestamp: true,
-        noService: true,
-        noLvl: true,
-      });
-    };
-    l.logPhase = (logger: EnhancedLogger, phase: string) => {
-      logger.breakLine();
-      logger.spacer("=");
-      logger.info(`"[START]" PHASE: ${phase}`);
-      logger.spacer("=");
-      logger.breakLine();
-    };
-    l.logEndPhase = (logger: EnhancedLogger, phase: string) => {
-      logger.breakLine();
-      logger.spacer("=");
-      logger.info(`"[END]" PHASE: ${phase}`);
-      logger.spacer("=");
-      logger.breakLine();
-    };
+    const l = logger.child({ service: params?.service });
 
     return l;
   }

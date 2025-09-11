@@ -7,7 +7,7 @@ import cors from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 
-const logger = await LoggerManager.createLogger({ service: "http-server" });
+const logger = await LoggerManager.get_logger({ service: "http-server" });
 export class BaseHttpServer {
   public _app: Elysia;
   public readonly prefix: string;
@@ -48,7 +48,7 @@ export class BaseHttpServer {
   get app() {
     return this._app;
   }
-  
+
   listen() {
     return this._app.listen(this.port, (server) => {
       logger.info(`Server http listening on ${server.hostname}:${server.port}...`);

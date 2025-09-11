@@ -6,7 +6,7 @@ import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import type { BaseMqttClientI } from "@/network/mqtt/BaseMqttClientI";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 
-const logger = await LoggerManager.createLogger({ service: "controller" });
+const logger = LoggerManager.get_logger({ service: "controller" });
 export type ServiceRegistry = {
   db: DatabaseManager;
   userManger: UserManagerI;

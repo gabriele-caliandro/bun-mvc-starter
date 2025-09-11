@@ -1,6 +1,7 @@
 import type { BaseHttpClientI } from "@/network/http/BaseHttpClientI";
-import type { EnhancedLogger } from "@/utils/logger/EnhancedLogger";
-import { LoggerManager, type LogLevel } from "@/utils/logger/LoggerManager";
+import type { LogLevel } from "@/utils/logger/log-levels";
+import { LoggerManager } from "@/utils/logger/LoggerManager";
+import type winston from "winston";
 
 /**
  * A generic HTTP client for making RESTful API calls with logging.
@@ -10,7 +11,7 @@ export class BaseHttpClient implements BaseHttpClientI {
   public readonly defaultHeaders: HeadersInit;
   public readonly serviceName: string;
 
-  protected logger: EnhancedLogger | null = null;
+  protected logger: winston.Logger | null = null;
 
   constructor(baseURL: string, serviceName: string, defaultHeaders: HeadersInit = {}, opts?: { lvl?: LogLevel }) {
     this.baseURL = baseURL;
@@ -23,7 +24,7 @@ export class BaseHttpClient implements BaseHttpClientI {
   }
 
   private async initLogger(lvl: LogLevel = "info") {
-    this.logger = await LoggerManager.createLogger({ service: this.serviceName, lvl });
+    this.logger = await LoggerManager.get_logger({ service: this.serviceName, lvl });
   }
 
   /**

@@ -15,16 +15,15 @@ export const _rootdir =
     : join(import.meta.dir, "..");
 
 export const config = await ConfigLoader.load();
+await LoggerManager.ensure_log_directory();
 async function main() {
-  const logger = await LoggerManager.createLogger();
+  const logger = LoggerManager.get_logger();
 
   const service = "replace-name";
 
-  logger.breakLine();
-  logger.spacer("=");
+  logger.info("-".repeat(50));
   logger.info(` ***${service}*** v${config.version} started`);
-  logger.spacer("=");
-  logger.breakLine();
+  logger.info("-".repeat(50));
 
   logger.info(`Loaded configuration:`, { config });
 

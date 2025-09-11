@@ -10,7 +10,7 @@ export class ConfigLoader {
     if (this.instance) return this.instance;
 
     // Load base configuration
-    const configFile = Bun.file(join(_rootdir, "config", "config.yaml"));
+    const configFile = Bun.file(join(_rootdir, "configs", "config.yaml"));
     const content = await configFile.text();
     const config = yaml.parse(content);
 

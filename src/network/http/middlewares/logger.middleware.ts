@@ -1,7 +1,7 @@
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import Elysia from "elysia";
 
-const logger = await LoggerManager.createLogger({ service: "http-server" });
+const logger = await LoggerManager.get_logger({ service: "http-server" });
 export const loggerMiddleware = new Elysia().onTransform(({ body, params, path, query, request: { method } }) => {
   const queryParams = Object.entries(query)
     .map(([key, value]) => `${key}=${value}`)
