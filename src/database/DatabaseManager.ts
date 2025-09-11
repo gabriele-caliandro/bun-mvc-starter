@@ -4,7 +4,7 @@ import postgres from "postgres";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import { sql } from "drizzle-orm";
 
-const logger = await LoggerManager.get_logger({ service: "database" });
+const logger = LoggerManager.get_logger({ service: "database" });
 
 /**
  * DatabaseManager - A singleton class to manage database connections

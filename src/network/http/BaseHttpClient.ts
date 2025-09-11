@@ -24,7 +24,7 @@ export class BaseHttpClient implements BaseHttpClientI {
   }
 
   private async initLogger(lvl: LogLevel = "info") {
-    this.logger = await LoggerManager.get_logger({ service: this.serviceName, lvl });
+    this.logger = LoggerManager.get_logger({ service: this.serviceName, lvl });
   }
 
   /**

@@ -1,16 +1,14 @@
-import { join } from "path";
 import ConfigSchema, { type Config } from "@/configs/config.schema";
-import { _rootdir } from "@/main";
 import yaml from "yaml";
 
 export class ConfigLoader {
   private static instance: Config | null = null;
 
-  static async load(): Promise<Config> {
+  static async load(path: string): Promise<Config> {
     if (this.instance) return this.instance;
 
     // Load base configuration
-    const configFile = Bun.file(join(_rootdir, "configs", "config.yaml"));
+    const configFile = Bun.file(path);
     const content = await configFile.text();
     const config = yaml.parse(content);
 

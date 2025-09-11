@@ -14,9 +14,10 @@ export const _rootdir =
     ? join(process.execPath, "..", "..")
     : join(import.meta.dir, "..");
 
-export const config = await ConfigLoader.load();
-await LoggerManager.ensure_log_directory();
 async function main() {
+  const config_path = join(_rootdir, "configs", "config.yaml");
+  const config = await ConfigLoader.load(config_path);
+  await LoggerManager.ensure_log_directory();
   const logger = LoggerManager.get_logger();
 
   const service = "replace-name";

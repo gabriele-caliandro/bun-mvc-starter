@@ -3,11 +3,11 @@ import { TAGS } from "@/network/http/tags";
 import { getErrorMessage } from "@/utils/get-error-message";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import { version } from "@/version";
+import { openapi } from "@elysiajs/openapi";
 import cors from "@elysiajs/cors";
-import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 
-const logger = await LoggerManager.get_logger({ service: "http-server" });
+const logger = LoggerManager.get_logger({ service: "http-server" });
 export class BaseHttpServer {
   public _app: Elysia;
   public readonly prefix: string;
@@ -24,8 +24,7 @@ export class BaseHttpServer {
     this._app
       .use(cors())
       .use(
-        swagger({
-          path: `${this.prefix}/docs`,
+        openapi({
           documentation: {
             info: {
               title: "Documentation title example",
