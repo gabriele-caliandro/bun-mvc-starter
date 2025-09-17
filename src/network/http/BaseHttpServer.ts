@@ -3,7 +3,7 @@ import { TAGS } from "@/network/http/tags";
 import { getErrorMessage } from "@/utils/get-error-message";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import { version } from "@/version";
-import { openapi } from "@elysiajs/openapi";
+import { swagger } from "@elysiajs/swagger";
 import cors from "@elysiajs/cors";
 import { Elysia } from "elysia";
 
@@ -24,7 +24,7 @@ export class BaseHttpServer {
     this._app
       .use(cors())
       .use(
-        openapi({
+        swagger({
           documentation: {
             info: {
               title: "Documentation title example",
@@ -36,9 +36,7 @@ export class BaseHttpServer {
         })
       )
       .use(loggerMiddleware)
-      .onError(({ error, code }) => {
-        if (code === "NOT_FOUND") return "Not Found";
-
+      .onError(({ error }) => {
         logger.error(`Unexpected error: ${getErrorMessage(error)}`);
       }) // Health check endpoint
       .get("/health", () => ({ status: "ok" }));
