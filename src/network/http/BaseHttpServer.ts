@@ -1,10 +1,9 @@
-import { loggerMiddleware } from "@/network/http/middlewares/logger.middleware";
 import { TAGS } from "@/network/http/tags";
-import { getErrorMessage } from "@/utils/get-error-message";
+import { get_error_message } from "@/utils/get-error-message";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import { version } from "@/version";
-import { swagger } from "@elysiajs/swagger";
 import cors from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 
 const logger = LoggerManager.get_logger({ service: "http-server" });
@@ -35,9 +34,26 @@ export class BaseHttpServer {
           },
         })
       )
-      .use(loggerMiddleware)
+      .onTransform(({ body, params, path, query, request: { method } }) => {
+        const queryParams = Object.entries(query)
+          .map(([key, value]) => `${key}=${value}`)
+          .join("&");
+
+        const details: Record<string, unknown> = {};
+        if (method !== "GET" && body !== undefined) {
+          details.body = body;
+        }
+        if (params) {
+          details.params = params;
+        }
+
+        logger.info(
+          `${method} ${path}${queryParams !== "" ? `?${queryParams}` : ""}`,
+          Object.keys(details).length !== 0 ? { details } : undefined
+        );
+      })
       .onError(({ error }) => {
-        logger.error(`Unexpected error: ${getErrorMessage(error)}`);
+        logger.error(`Unexpected error: ${get_error_message(error)}`);
       }) // Health check endpoint
       .get("/health", () => ({ status: "ok" }));
   }

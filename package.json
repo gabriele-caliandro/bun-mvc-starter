@@ -39,6 +39,7 @@
     "elysia": "1.1.26",
     "eslint": "^9.32.0",
     "eslint-plugin-neverthrow": "^1.1.4",
+    "mongodb": "^6.20.0",
     "mqtt": "^5.13.1",
     "neverthrow": "^8.2.0",
     "postgres": "^3.4.5",

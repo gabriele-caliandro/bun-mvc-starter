@@ -26,6 +26,6 @@ function toErrorWithMessage(maybeError: unknown): ErrorWithMessage {
   }
 }
 
-export function getErrorMessage(error: unknown) {
+export function get_error_message(error: unknown) {
   return toErrorWithMessage(error).message;
 }

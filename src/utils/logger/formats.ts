@@ -1,4 +1,4 @@
-import { getErrorMessage } from "@/utils/get-error-message";
+import { get_error_message } from "@/utils/get-error-message";
 import winston from "winston";
 
 /**
@@ -75,10 +75,10 @@ function baseFormat() {
     }
 
     if (err) {
-      logString += `\n${getErrorMessage(err)}`;
+      logString += `\n${get_error_message(err)}`;
     }
     if (error) {
-      logString += `\n${getErrorMessage(err)}`;
+      logString += `\n${get_error_message(err)}`;
     }
 
     return logString;
