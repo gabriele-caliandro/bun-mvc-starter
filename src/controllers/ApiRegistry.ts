@@ -1,5 +1,5 @@
 import name from "@/api/v1/name/[id]/route";
-import type { ServiceRegistry } from "@/controllers/Controller";
+import type { ServiceRegistry } from "./ServiceRegistry";
 import type { Model } from "@/models/Model";
 import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { LoggerManager } from "@/utils/logger/LoggerManager";

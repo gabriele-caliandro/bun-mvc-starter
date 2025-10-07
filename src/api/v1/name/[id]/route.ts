@@ -1,4 +1,4 @@
-import type { ServiceRegistry } from "@/controllers/Controller";
+import type { ServiceRegistry } from "@/controllers/ServiceRegistry";
 import type { Model } from "@/models/Model";
 import { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { TAGS } from "@/network/http/tags";

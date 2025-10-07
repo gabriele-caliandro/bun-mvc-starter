@@ -1,17 +1,11 @@
-import { RouteManager } from "@/controllers/RouteManager";
-import type { DatabaseManager } from "@/database/DatabaseManager";
-import type { UserManagerI } from "@/interfaces/user-manager/UserManagerI";
+import { ApiRegistry } from "@/controllers/ApiRegistry";
+import type { ServiceRegistry } from "@/controllers/ServiceRegistry";
 import type { Model } from "@/models/Model";
 import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
-import type { BaseMqttClientI } from "@/network/mqtt/BaseMqttClientI";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 
 const logger = LoggerManager.get_logger({ service: "controller" });
-export type ServiceRegistry = {
-  db: DatabaseManager;
-  userManger: UserManagerI;
-  mqtt: BaseMqttClientI;
-};
+
 export class Controller {
   constructor(
     private model: Model,
@@ -29,7 +23,7 @@ export class Controller {
     const setupHttpServerPromise = this.initializeHttpServer();
     const setupModelPromise = this.initializeModel();
 
-    RouteManager.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
+    ApiRegistry.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
     await Promise.all([setupDatabasePromise, setupHttpServerPromise, setupModelPromise]).catch((err) =>
       logger.error("Error while initializing controller: ", err)
     );
@@ -51,7 +45,7 @@ export class Controller {
 
     // Registering all the routes:
     logger.info("Setup http routes...");
-    RouteManager.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
+    ApiRegistry.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
   }
 
   private async initializeModel() {
