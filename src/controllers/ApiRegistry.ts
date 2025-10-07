@@ -5,7 +5,7 @@ import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 
 const logger = LoggerManager.get_logger({ service: "route-manager" });
-export class RouteManager {
+export class ApiRegistry {
   static setupRoutes(http: BaseHttpServer, model: Model, serviceRegistry: ServiceRegistry) {
     logger.info("Setting up routes for http server");
 
