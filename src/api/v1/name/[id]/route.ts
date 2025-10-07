@@ -1,3 +1,4 @@
+import { with_service_registry } from "@/api/plugins/with-service-registry";
 import type { ServiceRegistry } from "@/controllers/ServiceRegistry";
 import type { Model } from "@/models/Model";
 import { BaseHttpServer } from "@/network/http/BaseHttpServer";
@@ -15,14 +16,14 @@ import { z } from "zod";
 const name = (model: Model, serviceRegistry: ServiceRegistry) =>
   new Elysia()
     .use(BaseHttpServer.modelPlugin(model))
-    .use(BaseHttpServer.registerPlugin(serviceRegistry))
+    .use(with_service_registry(serviceRegistry))
     .post(
       "/name/:id",
-      async ({ params: { id }, serviceRegistry, model, error }) => {
+      async ({ params: { id }, service_registry, model, error }) => {
         // This is a mock implementation
         const name = model.names.at(Number.parseInt(id));
 
-        const user = await serviceRegistry.userManger.getUserById(id);
+        const user = await service_registry.userManger.getUserById(id);
 
         if (!name) {
           return error(404, {
