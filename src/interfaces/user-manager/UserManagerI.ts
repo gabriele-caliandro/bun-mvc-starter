@@ -1,5 +1,5 @@
-import type { UserDTO } from "@/interfaces/user-manager/dto/user.dto";
+import type { User } from "@/interfaces/user-manager/dto/user.dto";
 
 export interface UserManagerI {
-  getUserById(id: string): Promise<UserDTO>;
+  getUserById(id: string): Promise<User>;
 }

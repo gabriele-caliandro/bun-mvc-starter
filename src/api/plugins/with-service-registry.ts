@@ -1,4 +1,4 @@
-import type { ServiceRegistry } from "@/controllers/ServiceRegistry";
+import type { ServiceRegistry } from "@/services/ServiceRegistry";
 import Elysia from "elysia";
 
 export const with_service_registry = (service_registry: ServiceRegistry) => {

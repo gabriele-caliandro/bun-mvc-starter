@@ -23,14 +23,13 @@ async function main() {
   const service = "replace-name";
 
   logger.info("-".repeat(50));
-  logger.info(` ***${service}*** v${config.version} started`);
+  logger.info(` ***${service}***  started`);
   logger.info("-".repeat(50));
 
   logger.info(`Loaded configuration:`, { config });
 
   const DEFAULT_PORT = 8080;
-  const DEFAULT_PREFIX = "";
-  const serverHttp = new BaseHttpServer(config.http.port ?? DEFAULT_PORT, config.http.prefix ?? DEFAULT_PREFIX);
+  const serverHttp = new BaseHttpServer(config.http.port ?? DEFAULT_PORT);
 
   const model = new Model(["foo", "bar"]);
   const db = new DatabaseManager(

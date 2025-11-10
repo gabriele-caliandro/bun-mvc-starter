@@ -1,7 +1,7 @@
 import { ApiRegistry } from "@/controllers/ApiRegistry";
-import type { ServiceRegistry } from "@/controllers/ServiceRegistry";
 import type { Model } from "@/models/Model";
 import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
+import type { ServiceRegistry } from "@/services/ServiceRegistry";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 
 const logger = LoggerManager.get_logger({ service: "controller" });

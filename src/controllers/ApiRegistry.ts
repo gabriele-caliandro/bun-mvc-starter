@@ -1,5 +1,5 @@
 import name from "@/api/v1/name/[id]/route";
-import type { ServiceRegistry } from "./ServiceRegistry";
+import type { ServiceRegistry } from "../services/ServiceRegistry";
 import type { Model } from "@/models/Model";
 import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
@@ -13,6 +13,6 @@ export class ApiRegistry {
     http.app.get("/health", () => ({ status: "ok" }));
 
     // Group model-related endpoints under /api
-    http.app.group(http.prefix, (app) => app.use(name(model, serviceRegistry)));
+    http.app.use(name(model, serviceRegistry));
   }
 }

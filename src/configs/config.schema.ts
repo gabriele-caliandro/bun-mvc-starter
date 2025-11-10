@@ -2,7 +2,6 @@ import z from "zod";
 
 const HttpConfigSchema = z.object({
   port: z.number().nullish(),
-  prefix: z.string().nullish(),
 });
 
 const HttpSererSchema = z.object({
@@ -21,7 +20,6 @@ const MqttConfigSchema = z.object({
 
 // Main Config Schema
 const ConfigSchema = z.object({
-  version: z.string(),
   mqtt: MqttConfigSchema,
   http: HttpConfigSchema,
   database: DatabaseConfigSchema,

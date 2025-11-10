@@ -1,19 +1,18 @@
 # HTTP Server Configuration
 http:
   port: # Port to listen to.
-  prefix: # Prefix for the API. Default: ""
 
 mqtt:
   url: "mqtt://localhost:1883" # URL of the MQTT broker
 
 # User Manager Configuration
 user-manager-http-server:
-  url: # URL of the user manager
+  url: test # URL of the user manager
 
 # Database Configuration
 database:
-  host: # Host of the database
-  port: # Port of the database
-  database: # Database name
-  username: # Username to connect to the database
-  password: # Password to connect to the database
+  host: localhost # Host of the database
+  port: 5432 # Port of the database
+  database: postgres # Database name
+  username: admin # Username to connect to the database
+  password: admin # Password to connect to the database

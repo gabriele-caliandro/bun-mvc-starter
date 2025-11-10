@@ -1,37 +1,33 @@
-import { TAGS } from "@/network/http/tags";
 import { get_error_message } from "@/utils/get-error-message";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
-import { version } from "@/version";
 import cors from "@elysiajs/cors";
-import { swagger } from "@elysiajs/swagger";
+import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
+import z from "zod";
 
 const logger = LoggerManager.get_logger({ service: "http-server" });
 export class BaseHttpServer {
-  public _app: Elysia;
-  public readonly prefix: string;
+  public readonly PREFIX = "/prefix";
+  public readonly app: Elysia<"/prefix">;
   public readonly port: number;
 
-  constructor(port: number, prefix: string) {
+  constructor(port: number) {
     this.port = port;
-    this.prefix = prefix;
-    this._app = new Elysia();
+    this.app = new Elysia({
+      prefix: this.PREFIX,
+    });
     this.setup();
   }
 
   private setup() {
-    this._app
+    this.app
       .use(cors())
       .use(
-        swagger({
-          documentation: {
-            info: {
-              title: "Documentation title example",
-              description: "API for the documentation example",
-              version: version,
-            },
-            tags: Object.values(TAGS),
+        openapi({
+          mapJsonSchema: {
+            zod: z.toJSONSchema,
           },
+          path: "/docs",
         })
       )
       .onTransform(({ body, params, path, query, request: { method } }) => {
@@ -58,14 +54,10 @@ export class BaseHttpServer {
       .get("/health", () => ({ status: "ok" }));
   }
 
-  get app() {
-    return this._app;
-  }
-
   listen() {
-    return this._app.listen(this.port, (server) => {
+    return this.app.listen(this.port, (server) => {
       logger.info(`Server http listening on ${server.hostname}:${server.port}...`);
-      logger.info(`See http://localhost:${server.port}${this.prefix}/docs to explore the API`);
+      logger.info(`See http://localhost:${server.port}${this.PREFIX}/docs to explore the API`);
     });
   }
 
