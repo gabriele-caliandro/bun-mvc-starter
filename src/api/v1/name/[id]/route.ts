@@ -3,7 +3,6 @@ import type { ServiceRegistry } from "@/controllers/ServiceRegistry";
 import type { Model } from "@/models/Model";
 import { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { TAGS } from "@/network/http/tags";
-import { Box } from "@sinclair/typebox-adapter";
 import Elysia, { t } from "elysia";
 import { z } from "zod";
 
@@ -19,14 +18,14 @@ const name = (model: Model, serviceRegistry: ServiceRegistry) =>
     .use(with_service_registry(serviceRegistry))
     .post(
       "/name/:id",
-      async ({ params: { id }, service_registry, model, error }) => {
+      async ({ params: { id }, service_registry, model, status }) => {
         // This is a mock implementation
         const name = model.names.at(Number.parseInt(id));
 
         const user = await service_registry.userManger.getUserById(id);
 
         if (!name) {
-          return error(404, {
+          return status(404, {
             error: "Robotic cell not found",
           });
         }
@@ -37,7 +36,6 @@ const name = (model: Model, serviceRegistry: ServiceRegistry) =>
         };
       },
       {
-        body: Box(z.object({ name: z.string() })),
         response: {
           200: t.Object({
             user: t.Object({

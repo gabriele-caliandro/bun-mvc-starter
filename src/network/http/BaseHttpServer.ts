@@ -1,22 +1,22 @@
-import { TAGS } from "@/network/http/tags";
 import { get_error_message } from "@/utils/get-error-message";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
-import { version } from "@/version";
 import cors from "@elysiajs/cors";
-import { swagger } from "@elysiajs/swagger";
+import openapi from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import z from "zod";
 
 const logger = LoggerManager.get_logger({ service: "http-server" });
 export class BaseHttpServer {
-  public _app: Elysia;
+  public _app: Elysia<"/prefix">;
   public readonly prefix: string;
   public readonly port: number;
 
   constructor(port: number, prefix: string) {
     this.port = port;
     this.prefix = prefix;
-    this._app = new Elysia();
+    this._app = new Elysia<"/prefix">({
+      prefix: "/prefix",
+    });
     this.setup();
   }
 
@@ -24,17 +24,25 @@ export class BaseHttpServer {
     this._app
       .use(cors())
       .use(
-        swagger({
-          documentation: {
-            info: {
-              title: "Documentation title example",
-              description: "API for the documentation example",
-              version: version,
-            },
-            tags: Object.values(TAGS),
+        openapi({
+          mapJsonSchema: {
+            zod: z.toJSONSchema,
           },
+          path: "docs"
         })
       )
+      // .use(
+      //   swagger({
+      //     documentation: {
+      //       info: {
+      //         title: "Documentation title example",
+      //         description: "API for the documentation example",
+      //         version: version,
+      //       },
+      //       tags: Object.values(TAGS),
+      //     },
+      //   })
+      // )
       .onTransform(({ body, params, path, query, request: { method } }) => {
         const queryParams = Object.entries(query)
           .map(([key, value]) => `${key}=${value}`)
@@ -55,9 +63,14 @@ export class BaseHttpServer {
       })
       .onError(({ error }) => {
         logger.error(`Unexpected error: ${get_error_message(error)}`);
-      }) // Health check endpoint
-      .get("/health", () => ({ status: "ok" }))
-      .get("/health", () => ({ status: "ok" }), { response: z.object({ status: z.string() }) });
+      })
+      // Health check endpoint
+      .get("/health", () => ({ status: "ok" }), {
+        response: z.object({ status: z.string() }).meta({
+          title: "Health check",
+          description: "Health check endpoint",
+        }),
+      });
   }
 
   get app() {

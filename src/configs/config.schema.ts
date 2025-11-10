@@ -21,7 +21,6 @@ const MqttConfigSchema = z.object({
 
 // Main Config Schema
 const ConfigSchema = z.object({
-  version: z.string(),
   mqtt: MqttConfigSchema,
   http: HttpConfigSchema,
   database: DatabaseConfigSchema,
