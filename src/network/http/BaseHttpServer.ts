@@ -5,6 +5,7 @@ import { version } from "@/version";
 import cors from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
+import z from "zod";
 
 const logger = LoggerManager.get_logger({ service: "http-server" });
 export class BaseHttpServer {
@@ -55,7 +56,8 @@ export class BaseHttpServer {
       .onError(({ error }) => {
         logger.error(`Unexpected error: ${get_error_message(error)}`);
       }) // Health check endpoint
-      .get("/health", () => ({ status: "ok" }));
+      .get("/health", () => ({ status: "ok" }))
+      .get("/health", () => ({ status: "ok" }), { response: z.object({ status: z.string() }) });
   }
 
   get app() {
