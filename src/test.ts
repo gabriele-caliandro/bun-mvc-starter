@@ -1,23 +1,25 @@
-import { BaseMqttClient } from "@/network/mqtt/BaseMqttClient";
+import pino from "pino";
 
-type TemperaturePayload = { value: number; deviceId: string; timestamp: number };
-type TopicMap = {
-  "sensors/temperature": TemperaturePayload;
-  "devices/status": { deviceId: string };
-  "alerts/critical": { message: string };
-  position: { x: string; y: string };
-};
-const mqttClient = new BaseMqttClient<TopicMap>("test-id", "mqtt://localhost:1883");
-await mqttClient.connect();
-
-setInterval(() => {
-  mqttClient.publish("alerts/critical", { message: "Critical alert!" }, { qos: 2 });
-}, 5000);
-
-mqttClient.onMessage("devices/status", (payload) => {
-  console.log("Received position update:", payload);
+const transport = pino.transport({
+  // name: "my-personal-logger",
+  target: "pino-pretty",
+  options: {
+    // destination: "/dev/null",
+  },
+});
+const logger = pino({
+  transports: [transport],
 });
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+logger.info("Hello World! This is a test message. I hope you are doing well. If you are not, please contact me.");
+logger.info(30);
+logger.info(30, "messaggio con numero");
+const user = { name: "Gabriel", age: 30 };
+logger.info({ user });
+const error = new Error("Something went wrong");
+logger.info("altro messaggio", error);
+logger.error(error);
+
+const child = logger.child({ child: "child", deep: { key: 20 } });
+child.warn("quasi error");
+child.error("quasi error");
