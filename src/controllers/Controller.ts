@@ -1,5 +1,4 @@
 import { ApiRegistry } from "@/controllers/ApiRegistry";
-import type { Model } from "@/models/Model";
 import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import type { ServiceRegistry } from "@/services/ServiceRegistry";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
@@ -8,7 +7,6 @@ const logger = LoggerManager.get_logger({ service: "controller" });
 
 export class Controller {
   constructor(
-    private model: Model,
     private httpServer: BaseHttpServer,
     private serviceRegistry: ServiceRegistry
   ) {}
@@ -21,10 +19,9 @@ export class Controller {
 
     const setupDatabasePromise = this.initializeDatabase();
     const setupHttpServerPromise = this.initializeHttpServer();
-    const setupModelPromise = this.initializeModel();
 
-    ApiRegistry.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
-    await Promise.all([setupDatabasePromise, setupHttpServerPromise, setupModelPromise]).catch((err) =>
+    ApiRegistry.setupRoutes(this.httpServer, this.serviceRegistry);
+    await Promise.all([setupDatabasePromise, setupHttpServerPromise]).catch((err) =>
       logger.error("Error while initializing controller: ", err)
     );
   }
@@ -45,14 +42,6 @@ export class Controller {
 
     // Registering all the routes:
     logger.info("Setup http routes...");
-    ApiRegistry.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
-  }
-
-  private async initializeModel() {
-    logger.info("Initializing model...");
-
-    // Create areas if they don't exist
-    const res = await this.serviceRegistry.db.drizzle.execute("SELECT 1 as test");
-    this.model.names.push(res.toString());
+    ApiRegistry.setupRoutes(this.httpServer, this.serviceRegistry);
   }
 }

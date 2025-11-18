@@ -60,19 +60,4 @@ export class BaseHttpServer {
       logger.info(`See http://localhost:${server.port}${this.PREFIX}/docs to explore the API`);
     });
   }
-
-  /**
-   * Inject the passed model into the Elysia app.
-   * @param model
-   */
-  static modelPlugin<T>(model: T) {
-    return new Elysia({ name: "model" }).decorate("model", model);
-  }
-  /**
-   * Inject services registry into the Elysia app.
-   * @param model
-   */
-  static registerPlugin<T>(serviceRegistry: T) {
-    return new Elysia({ name: "service-registry" }).decorate("serviceRegistry", serviceRegistry);
-  }
 }

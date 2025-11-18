@@ -1,10 +1,9 @@
+import { with_models } from "@/api/plugins/with-models";
 import { with_service_registry } from "@/api/plugins/with-service-registry";
-import { UserSchema } from "@/interfaces/user-manager/dto/user.dto";
-import type { Model } from "@/models/Model";
-import { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { TAGS } from "@/network/http/tags";
 import type { ServiceRegistry } from "@/services/ServiceRegistry";
-import Elysia, { t } from "elysia";
+import Elysia from "elysia";
+import z from "zod";
 
 /**
  * This is an example of a route handler
@@ -12,17 +11,14 @@ import Elysia, { t } from "elysia";
  * @param serviceRegistry
  * @returns
  */
-const name = (model: Model, serviceRegistry: ServiceRegistry) =>
+const name = (serviceRegistry: ServiceRegistry) =>
   new Elysia()
-    .use(BaseHttpServer.modelPlugin(model))
+    .use(with_models())
     .use(with_service_registry(serviceRegistry))
     .post(
       "/name/:id",
-      async ({ params: { id }, service_registry, model, status }) => {
-        // This is a mock implementation
-        const name = model.names.at(Number.parseInt(id));
-
-        const user = await service_registry.userManger.getUserById(id);
+      async ({ params: { id }, service_registry, status }) => {
+        const user = await service_registry.user_manager.getUserById(id);
 
         if (!name) {
           return status(404, {
@@ -34,9 +30,9 @@ const name = (model: Model, serviceRegistry: ServiceRegistry) =>
       },
       {
         response: {
-          200: UserSchema,
-          404: t.Object({
-            error: t.String(),
+          200: "UserSchema",
+          404: z.object({
+            error: z.string(),
           }),
         },
         detail: {

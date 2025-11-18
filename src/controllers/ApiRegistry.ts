@@ -1,18 +1,17 @@
 import name from "@/api/v1/name/[id]/route";
-import type { ServiceRegistry } from "../services/ServiceRegistry";
-import type { Model } from "@/models/Model";
 import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
+import type { ServiceRegistry } from "../services/ServiceRegistry";
 
 const logger = LoggerManager.get_logger({ service: "route-manager" });
 export class ApiRegistry {
-  static setupRoutes(http: BaseHttpServer, model: Model, serviceRegistry: ServiceRegistry) {
+  static setupRoutes(http: BaseHttpServer, serviceRegistry: ServiceRegistry) {
     logger.info("Setting up routes for http server");
 
     // Health check endpoint
     http.app.get("/health", () => ({ status: "ok" }));
 
     // Group model-related endpoints under /api
-    http.app.use(name(model, serviceRegistry));
+    http.app.use(name( serviceRegistry));
   }
 }

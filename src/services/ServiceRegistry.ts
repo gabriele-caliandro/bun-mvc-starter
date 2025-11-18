@@ -4,6 +4,6 @@ import type { BaseMqttClientI } from "@/network/mqtt/BaseMqttClientI";
 
 export type ServiceRegistry = {
   db: DatabaseManager;
-  userManger: UserManagerI;
+  user_manager: UserManagerI;
   mqtt: BaseMqttClientI;
 };

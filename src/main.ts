@@ -2,7 +2,6 @@ import { ConfigLoader } from "@/configs/ConfigLoader";
 import { Controller } from "@/controllers/Controller";
 import { DatabaseManager } from "@/database/DatabaseManager";
 import { UserManagerHttpClient } from "@/interfaces/user-manager/UserManagerHttpClient";
-import { Model } from "@/models/Model";
 import { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { BaseMqttClient } from "@/network/mqtt/BaseMqttClient";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
@@ -31,7 +30,6 @@ async function main() {
   const DEFAULT_PORT = 8080;
   const serverHttp = new BaseHttpServer(config.http.port ?? DEFAULT_PORT);
 
-  const model = new Model(["foo", "bar"]);
   const db = new DatabaseManager(
     config.database.host,
     config.database.port,
@@ -43,9 +41,9 @@ async function main() {
 
   const userManger = new UserManagerHttpClient(config["user-manager-http-server"].url, "user-manager");
 
-  const controller = new Controller(model, serverHttp, {
+  const controller = new Controller(serverHttp, {
     db,
-    userManger,
+    user_manager: userManger,
     mqtt,
   });
 
