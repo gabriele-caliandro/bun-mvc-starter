@@ -1,9 +1,9 @@
 import type { BaseMqttClientI } from "@/network/mqtt/BaseMqttClientI";
-import { LoggerManager } from "@/utils/logger/LoggerManager";
+import { logger as baseLogger } from "@/utils/logger/logger";
 import mqtt, { type ISubscriptionGrant, type MqttClient, type PacketCallback } from "mqtt";
 
 export type QoS = 0 | 1 | 2;
-const logger = LoggerManager.get_logger({ service: "mqtt" });
+const logger = baseLogger.child({ service: "mqtt" });
 
 export class BaseMqttClient<T extends Record<string, unknown> = Record<string, unknown>> implements BaseMqttClientI<T> {
   private client: MqttClient | null = null;
@@ -36,7 +36,7 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
         });
 
         this.client.on("error", (error) => {
-          logger.error("MQTT error:", error);
+          logger.error(error, "MQTT error:");
           logger.warn(`Retring to connect to MQTT broker in ${this.reconnectPeriod}ms`);
           if (this.reconnectAttempts >= this.maxReconnectAttempts) {
             logger.error(`Max reconnection attempts (${this.maxReconnectAttempts}) reached`);
@@ -61,11 +61,11 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
 
         this.client.on("message", (topic, payload) => {
           const content = JSON.parse(payload.toString());
-          logger.info(`Topic "${topic}":`, { payload: content });
+          logger.info({ payload: content }, `Topic "${topic}":`);
           this.handleMessage(topic, payload.toString());
         });
       } catch (error) {
-        logger.error("Failed to connect to MQTT broker:", error);
+        logger.error(error, "Failed to connect to MQTT broker:");
       }
     });
   }
@@ -83,7 +83,7 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
         try {
           handler(parsedMessage);
         } catch (error) {
-          logger.error(`Error in message handler for topic ${topic}:`, error);
+          logger.error(error, `Error in message handler for topic ${topic}:`);
         }
       });
     }
@@ -108,7 +108,7 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
         callback?.(granted);
       })
       .catch((err) => {
-        logger.error(`Error subscribing to topic ${topic.toString()}`, { error: err });
+        logger.error({ error: err }, `Error subscribing to topic ${topic.toString()}`);
       });
   }
 
@@ -128,7 +128,7 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
     this.client.unsubscribe(topic, (err, packet) => {
       logger.info(`Unsubscribed from topic "${topic}"`);
       if (err) {
-        logger.error(`Error unsubscribing from topic "${topic}"`, { err });
+        logger.error(err, `Error unsubscribing from topic "${topic}"`);
       }
       callback?.(err, packet);
     });

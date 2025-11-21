@@ -1,11 +1,10 @@
+import { logger_middleware } from "@/network/http/middlewares/logger.middleware";
 import { get_error_message } from "@/utils/get-error-message";
-import { LoggerManager } from "@/utils/logger/LoggerManager";
+import { logger } from "@/utils/logger/logger";
 import cors from "@elysiajs/cors";
 import openapi from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import z from "zod";
-
-const logger = LoggerManager.get_logger({ service: "http-server" });
 export class BaseHttpServer {
   public _app: Elysia<"/prefix">;
   public readonly prefix: string;
@@ -28,42 +27,10 @@ export class BaseHttpServer {
           mapJsonSchema: {
             zod: z.toJSONSchema,
           },
-          path: "docs"
+          path: "docs",
         })
       )
-      // .use(
-      //   swagger({
-      //     documentation: {
-      //       info: {
-      //         title: "Documentation title example",
-      //         description: "API for the documentation example",
-      //         version: version,
-      //       },
-      //       tags: Object.values(TAGS),
-      //     },
-      //   })
-      // )
-      .onTransform(({ body, params, path, query, request: { method } }) => {
-        const queryParams = Object.entries(query)
-          .map(([key, value]) => `${key}=${value}`)
-          .join("&");
-
-        const details: Record<string, unknown> = {};
-        if (method !== "GET" && body !== undefined) {
-          details.body = body;
-        }
-        if (params) {
-          details.params = params;
-        }
-
-        logger.info(
-          `${method} ${path}${queryParams !== "" ? `?${queryParams}` : ""}`,
-          Object.keys(details).length !== 0 ? { details } : undefined
-        );
-      })
-      .onError(({ error }) => {
-        logger.error(`Unexpected error: ${get_error_message(error)}`);
-      })
+      .use(logger_middleware)
       // Health check endpoint
       .get("/health", () => ({ status: "ok" }), {
         response: z.object({ status: z.string() }).meta({
@@ -82,20 +49,5 @@ export class BaseHttpServer {
       logger.info(`Server http listening on ${server.hostname}:${server.port}...`);
       logger.info(`See http://localhost:${server.port}${this.prefix}/docs to explore the API`);
     });
-  }
-
-  /**
-   * Inject the passed model into the Elysia app.
-   * @param model
-   */
-  static modelPlugin<T>(model: T) {
-    return new Elysia({ name: "model" }).decorate("model", model);
-  }
-  /**
-   * Inject services registry into the Elysia app.
-   * @param model
-   */
-  static registerPlugin<T>(serviceRegistry: T) {
-    return new Elysia({ name: "service-registry" }).decorate("serviceRegistry", serviceRegistry);
   }
 }

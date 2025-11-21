@@ -1,3 +1,4 @@
+import { _rootdir } from "@/_rootdir";
 import { ConfigLoader } from "@/configs/ConfigLoader";
 import { Controller } from "@/controllers/Controller";
 import { DatabaseManager } from "@/database/DatabaseManager";
@@ -5,28 +6,38 @@ import { UserManagerHttpClient } from "@/interfaces/user-manager/UserManagerHttp
 import { Model } from "@/models/Model";
 import { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { BaseMqttClient } from "@/network/mqtt/BaseMqttClient";
-import { LoggerManager } from "@/utils/logger/LoggerManager";
+import { logger } from "@/utils/logger/logger";
+import { version } from "@/version";
 import { join } from "path";
 
-// Gets the root directory of the project. Checks if it's in production or development mode.
-export const _rootdir =
-  import.meta.dir.startsWith("/$bunfs/root") || import.meta.dir.startsWith("B:\\~BUN\\root")
-    ? join(process.execPath, "..", "..")
-    : join(import.meta.dir, "..");
-
 async function main() {
+  process.on("uncaughtException", (err) => {
+    // log the exception
+    logger.fatal(err, "uncaught exception detected");
+
+    // If a graceful shutdown is not achieved after 1 second,
+    // shut down the process completely
+    setTimeout(() => {
+      process.abort(); // exit immediately and generate a core dump file
+    }, 1000).unref();
+    process.exit(1);
+  });
+
+  process.on("SIGTERM", async () => {
+    logger.flush(); // Force buffer flush
+    process.exit(0);
+  });
+
   const config_path = join(_rootdir, "configs", "config.yaml");
   const config = await ConfigLoader.load(config_path);
-  await LoggerManager.ensure_log_directory();
-  const logger = LoggerManager.get_logger();
 
   const service = "replace-name";
 
   logger.info("-".repeat(50));
-  logger.info(` ***${service}*** v${config.version} started`);
+  logger.info(` ***${service}*** v${version} started`);
   logger.info("-".repeat(50));
 
-  logger.info(`Loaded configuration:`, { config });
+  logger.info(config, "Loaded configuration:");
 
   const DEFAULT_PORT = 8080;
   const DEFAULT_PREFIX = "";
@@ -53,13 +64,13 @@ async function main() {
   try {
     await controller.init();
   } catch (err) {
-    logger.error(`Failed to initialize controller: `, err);
+    logger.error(err, "Failed to initialize controller: ");
     process.exit(0);
   }
   try {
     controller.run();
   } catch (err) {
-    logger.error(`Error while running controller: `, err);
+    logger.error(err, "Error while running controller: ");
     process.exit(0);
   }
 }

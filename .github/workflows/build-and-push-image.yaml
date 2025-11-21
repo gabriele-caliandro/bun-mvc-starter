@@ -43,7 +43,7 @@ jobs:
 
       - name: Type checking
         working-directory: ./frontend
-        run: bun run tsc
+        run: bun run tsgo
 
       - name: Lint code
         working-directory: ./frontend

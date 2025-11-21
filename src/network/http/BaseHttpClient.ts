@@ -1,7 +1,7 @@
 import type { BaseHttpClientI } from "@/network/http/BaseHttpClientI";
-import type { LogLevel } from "@/utils/logger/log-levels";
-import { LoggerManager } from "@/utils/logger/LoggerManager";
-import type winston from "winston";
+import { logger as baseLogger } from "@/utils/logger/logger";
+import type { Logger } from "pino";
+import { Result } from "neverthrow";
 
 /**
  * A generic HTTP client for making RESTful API calls with logging.
@@ -11,27 +11,23 @@ export class BaseHttpClient implements BaseHttpClientI {
   public readonly defaultHeaders: HeadersInit;
   public readonly serviceName: string;
 
-  protected logger: winston.Logger | null = null;
+  protected logger: Logger;
 
-  constructor(baseURL: string, serviceName: string, defaultHeaders: HeadersInit = {}, opts?: { lvl?: LogLevel }) {
+  constructor(baseURL: string, serviceName: string, defaultHeaders: HeadersInit = {}) {
     this.baseURL = baseURL;
     this.serviceName = serviceName;
     this.defaultHeaders = {
       "Content-Type": "application/json",
       ...defaultHeaders,
     };
-    this.initLogger(opts?.lvl);
-  }
-
-  private async initLogger(lvl: LogLevel = "info") {
-    this.logger = LoggerManager.get_logger({ service: this.serviceName, lvl });
+    this.logger = baseLogger.child({ service: this.serviceName });
   }
 
   /**
    * Internal method to handle requests and response processing.
    * @throws {Error} If the request fails
    */
-  protected async request<T>(method: string, path: string, body?: unknown, params?: Record<string, string>): Promise<T> {
+  protected async request<T>(method: string, path: string, body?: unknown, params?: Record<string, string>): Promise<Result<T, Error>> {
     try {
       // Build URL with query parameters if provided
       const url = new URL(`${this.baseURL}${path}`);
@@ -53,7 +49,7 @@ export class BaseHttpClient implements BaseHttpClientI {
       }
 
       // Log the outgoing request
-      this.logger?.debug(`Making ${method} request to '${url.toString()}'`, {
+      this.logger.debug(`Making ${method} request to '${url.toString()}'`, {
         method,
         url: url.toString(),
         headers: this.defaultHeaders,
@@ -85,7 +81,7 @@ export class BaseHttpClient implements BaseHttpClientI {
         }
 
         // Log error with details
-        this.logger?.error(`Request failed: ${errorMessage}`, {
+        this.logger.error(`Request failed: ${errorMessage}`, {
           method,
           url: url.toString(),
           status: response.status,
@@ -104,7 +100,7 @@ export class BaseHttpClient implements BaseHttpClientI {
       if (contentType?.includes("application/json")) {
         const data = (await response.json()) as T;
         // Log successful JSON response (with limited data info for privacy/size)
-        this.logger?.debug(`Successfully processed JSON response`, {
+        this.logger.debug(`Successfully processed JSON response`, {
           method,
           url: url.toString(),
           responseType: "json",
@@ -118,7 +114,7 @@ export class BaseHttpClient implements BaseHttpClientI {
       // Handle text responses
       if (contentType?.includes("text/")) {
         const text = await response.text();
-        this.logger?.debug(`Successfully processed text response`, {
+        this.logger.debug(`Successfully processed text response`, {
           method,
           url: url.toString(),
           responseType: "text",
@@ -130,7 +126,7 @@ export class BaseHttpClient implements BaseHttpClientI {
       }
 
       // Return empty object for other content types
-      this.logger?.debug(`Successfully processed response with content type: ${contentType}`, {
+      this.logger.debug(`Successfully processed response with content type: ${contentType}`, {
         method,
         url: url.toString(),
         responseType: contentType || "unknown",
@@ -139,7 +135,7 @@ export class BaseHttpClient implements BaseHttpClientI {
     } catch (error) {
       // Log unexpected errors (network issues, etc.)
       if (!(error instanceof Error) || !error.message.includes("HTTP error")) {
-        this.logger?.error(`Unexpected error during ${method} request to ${this.baseURL}${path}`, {
+        this.logger.error(`Unexpected error during ${method} request to ${this.baseURL}${path}`, {
           error: error instanceof Error ? error.message : String(error),
           method,
           path,

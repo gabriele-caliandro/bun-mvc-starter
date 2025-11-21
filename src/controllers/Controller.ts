@@ -1,10 +1,8 @@
-import { ApiRegistry } from "@/controllers/ApiRegistry";
+import { RouteRegistry } from "@/controllers/RouteRegistry";
 import type { ServiceRegistry } from "@/controllers/ServiceRegistry";
 import type { Model } from "@/models/Model";
 import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
-import { LoggerManager } from "@/utils/logger/LoggerManager";
-
-const logger = LoggerManager.get_logger({ service: "controller" });
+import { logger } from "@/utils/logger/logger";
 
 export class Controller {
   constructor(
@@ -23,7 +21,7 @@ export class Controller {
     const setupHttpServerPromise = this.initializeHttpServer();
     const setupModelPromise = this.initializeModel();
 
-    ApiRegistry.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
+    RouteRegistry.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
     await Promise.all([setupDatabasePromise, setupHttpServerPromise, setupModelPromise]).catch((err) =>
       logger.error("Error while initializing controller: ", err)
     );
@@ -45,7 +43,7 @@ export class Controller {
 
     // Registering all the routes:
     logger.info("Setup http routes...");
-    ApiRegistry.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
+    RouteRegistry.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
   }
 
   private async initializeModel() {

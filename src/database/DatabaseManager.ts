@@ -1,10 +1,10 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { LoggerManager } from "@/utils/logger/LoggerManager";
+import { logger as baseLogger } from "@/utils/logger/logger";
 import { sql } from "drizzle-orm";
 
-const logger = LoggerManager.get_logger({ service: "database" });
+const logger = baseLogger.child({ service: "database" });
 
 /**
  * DatabaseManager - A singleton class to manage database connections
@@ -86,7 +86,7 @@ export class DatabaseManager {
 
         // Test the connection
         const testResult = await this._drizzle.execute(sql`SELECT 1 as test`);
-        logger.info("Database connection successful", { testResult });
+        logger.info({ testResult }, "Database connection successful");
 
         return this._drizzle;
       } catch (error) {
