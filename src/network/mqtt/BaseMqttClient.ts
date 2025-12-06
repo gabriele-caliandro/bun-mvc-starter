@@ -1,5 +1,5 @@
 import type { BaseMqttClientI } from "@/network/mqtt/BaseMqttClientI";
-import { logger as baseLogger } from "@/utils/logger/logger";
+import { logger as baseLogger } from "@/utils/logger/LoggerManager";
 import mqtt, { type ISubscriptionGrant, type MqttClient, type PacketCallback } from "mqtt";
 
 export type QoS = 0 | 1 | 2;

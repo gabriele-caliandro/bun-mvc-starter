@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { logger as baseLogger } from "@/utils/logger/logger";
+import { logger as baseLogger } from "@/utils/logger/LoggerManager";
 import { sql } from "drizzle-orm";
 
 const logger = baseLogger.child({ service: "database" });

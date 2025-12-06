@@ -1,6 +1,6 @@
 import { logger_middleware } from "@/network/http/middlewares/logger.middleware";
 import { get_error_message } from "@/utils/get-error-message";
-import { logger } from "@/utils/logger/logger";
+import { logger } from "@/utils/logger/LoggerManager";
 import cors from "@elysiajs/cors";
 import openapi from "@elysiajs/openapi";
 import { Elysia } from "elysia";

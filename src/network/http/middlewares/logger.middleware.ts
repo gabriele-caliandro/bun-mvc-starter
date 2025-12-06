@@ -1,8 +1,8 @@
 import { get_error_message } from "@/utils/get-error-message";
-import { logger as logger_factory } from "@/utils/logger/logger";
+import { LoggerManager } from "@/utils/logger/LoggerManager";
 import Elysia from "elysia";
 
-const logger = logger_factory.child({ serivce: "http" });
+const logger = LoggerManager.get_base_logger().child({ serivce: "http" });
 export const logger_middleware = new Elysia({ name: "logger-middleware" })
   .derive(
     {
@@ -23,6 +23,9 @@ export const logger_middleware = new Elysia({ name: "logger-middleware" })
       if (body !== undefined) {
         details.body = body;
       }
+      if (query !== undefined) {
+        details.query = query;
+      }
 
       const formatted_params = query
         ? Object.keys(query)
@@ -40,7 +43,7 @@ export const logger_middleware = new Elysia({ name: "logger-middleware" })
     ({ request, path, set, start_time }) => {
       const duration = start_time ? Date.now() - start_time.getTime() : undefined;
 
-      if (typeof set.status === "number" && set.status > 400) {
+      if (typeof set.status === "number" && set.status > 401) {
         logger.error(`<-- ${request.method} ${path} ${set.status} ${duration ? `${duration}ms` : ""}`);
       } else {
         logger.info(`<-- ${request.method} ${path} ${set.status} ${duration ? `${duration}ms` : ""}`);

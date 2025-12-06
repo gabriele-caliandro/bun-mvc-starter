@@ -5,8 +5,8 @@ import pino, { type Logger } from "pino";
 
 const is_production = process.env.NODE_ENV === "prod" || process.env.NODE_ENV === "production";
 
-const ctx = new AsyncLocalStorage<{
-  req_id: number;
+export const transaction_ctx = new AsyncLocalStorage<{
+  transaction_id: number;
 }>();
 
 export class LoggerManager {
@@ -32,8 +32,9 @@ export class LoggerManager {
                   count: 60,
                 },
                 frequency: "daily",
-                size: "5K",
+                size: "1M",
                 mkdir: true,
+                level: "trace",
               },
             }
           : {
@@ -43,15 +44,22 @@ export class LoggerManager {
                 mkdir: true,
                 colorize: false,
               },
+              level: "trace",
             },
         {
           target: "pino-pretty",
+          level: "trace",
         },
       ],
     });
     return pino(
       {
-        // TODO: add mixin for injecting request id
+        mixin: () => {
+          return {
+            transaction_id: transaction_ctx.getStore()?.transaction_id,
+          };
+        },
+        level: process.env.LOG_LEVEL || "info",
         redact: ["*.password"],
         name: "pino-logger",
         timestamp: pino.stdTimeFunctions.isoTime,

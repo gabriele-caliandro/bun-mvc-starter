@@ -1,11 +1,5 @@
-import { logger } from "@/utils/logger/logger";
-import { AsyncLocalStorage } from "async_hooks";
+import { LoggerManager, transaction_ctx } from "@/utils/logger/LoggerManager";
 
-// const ctx = new AsyncLocalStorage<{
-//   req_id: number;
-// }>();
-
-setInterval(() => {
-  const error = new Error("How am i formatted");
-  logger.info( error, "page");
-}, 2000);
+transaction_ctx.run({ transaction_id: 1 }, () => {
+  LoggerManager.get_base_logger().info("test");
+});
