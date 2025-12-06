@@ -1,15 +1,16 @@
+<<<<<<< Updated upstream
 import name from "@/api/v1/name/[id]/route";
 import type { ServiceRegistry } from "./ServiceRegistry";
 import type { Model } from "@/models/Model";
 import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
 import { logger as baseLogger } from "@/utils/logger/LoggerManager";
+=======
+import type { ServiceRegistry } from "@/controllers/ServiceRegistry";
+import { create_base_http_server } from "@/network/http/BaseHttpServer";
+import { vehicles_routes } from "@/api/vehicles/route";
+>>>>>>> Stashed changes
 
-const logger = baseLogger.child({ service: "route-manager" });
-export class RouteRegistry {
-  static setupRoutes(http: BaseHttpServer, model: Model, serviceRegistry: ServiceRegistry) {
-    logger.info("Setting up routes for http server");
+export const create_agilox_interface_app = (service_registry: ServiceRegistry) =>
+  create_base_http_server().use(vehicles_routes(service_registry));
 
-    
-    http.app.use(name(model, serviceRegistry));
-  }
-}
+export type AgiloxInterfaceApp = ReturnType<typeof create_agilox_interface_app>;

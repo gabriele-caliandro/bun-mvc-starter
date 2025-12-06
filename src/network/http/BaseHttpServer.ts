@@ -1,53 +1,41 @@
 import { logger_middleware } from "@/network/http/middlewares/logger.middleware";
+<<<<<<< Updated upstream
 import { get_error_message } from "@/utils/get-error-message";
 import { logger } from "@/utils/logger/LoggerManager";
+=======
+import { version } from "@/version";
+>>>>>>> Stashed changes
 import cors from "@elysiajs/cors";
-import openapi from "@elysiajs/openapi";
+import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import z from "zod";
-export class BaseHttpServer {
-  public _app: Elysia<"/prefix">;
-  public readonly prefix: string;
-  public readonly port: number;
 
-  constructor(port: number, prefix: string) {
-    this.port = port;
-    this.prefix = prefix;
-    this._app = new Elysia<"/prefix">({
-      prefix: "/prefix",
-    });
-    this.setup();
-  }
-
-  private setup() {
-    this._app
-      .use(cors())
-      .use(
-        openapi({
-          mapJsonSchema: {
-            zod: z.toJSONSchema,
+export const http_api_prefix = "loginautomation/interface/agilox/api" as const;
+type ApiPrefix = typeof http_api_prefix;
+export const create_base_http_server = () =>
+  new Elysia<ApiPrefix>({
+    prefix: http_api_prefix,
+  })
+    .use(cors())
+    .use(logger_middleware)
+    .use(
+      openapi({
+        documentation: {
+          info: {
+            title: "Login Automation - Agilox Interface API",
+            description: "API for managing agilox through a more standardized, typesafe, REST-like method through Login Automation conventions",
+            version: version,
           },
-          path: "docs",
-        })
-      )
-      .use(logger_middleware)
-      // Health check endpoint
-      .get("/health", () => ({ status: "ok" }), {
-        response: z.object({ status: z.string() }).meta({
-          title: "Health check",
-          description: "Health check endpoint",
-        }),
-      });
-  }
-
-  get app() {
-    return this._app;
-  }
-
-  listen() {
-    return this._app.listen(this.port, (server) => {
-      logger.info(`Server http listening on ${server.hostname}:${server.port}...`);
-      logger.info(`See http://localhost:${server.port}${this.prefix}/docs to explore the API`);
+        },
+        mapJsonSchema: {
+          zod: z.toJSONSchema,
+        },
+        path: "docs",
+      })
+    )
+    .post("/health", () => ({ status: "ok" }), {
+      detail: {
+        summary: "Health check",
+        description: "Returns a health check response",
+      },
     });
-  }
-}
