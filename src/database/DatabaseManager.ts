@@ -1,10 +1,10 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { logger as baseLogger } from "@/utils/logger/LoggerManager";
+import { base_logger } from "@/utils/logger/logger";
 import { sql } from "drizzle-orm";
 
-const logger = baseLogger.child({ service: "database" });
+const logger = base_logger.child({ name: "database" });
 
 /**
  * DatabaseManager - A singleton class to manage database connections

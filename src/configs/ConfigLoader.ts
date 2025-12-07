@@ -1,5 +1,6 @@
 import ConfigSchema, { type Config } from "@/configs/config.schema";
 import yaml from "yaml";
+import z from "zod";
 
 export class ConfigLoader {
   private static instance: Config | null = null;
@@ -16,7 +17,7 @@ export class ConfigLoader {
     const result = ConfigSchema.safeParse(config);
     if (!result.success) {
       console.error("❌ Configuration validation failed:");
-      console.error(result.error.format());
+      console.error(z.treeifyError(result.error));
       process.exit(1);
     }
 

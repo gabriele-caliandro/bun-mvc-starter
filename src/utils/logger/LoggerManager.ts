@@ -1,4 +1,4 @@
-import { _rootdir } from "@/_rootdir";
+import { _rootdir } from "@/root-dir";
 import { AsyncLocalStorage } from "async_hooks";
 import path from "path";
 import pino, { type Logger } from "pino";

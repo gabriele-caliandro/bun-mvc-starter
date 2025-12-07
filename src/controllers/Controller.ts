@@ -1,56 +1,33 @@
-import { RouteRegistry } from "@/controllers/RouteRegistry";
+import { create_http_app } from "@/controllers/create_http_app";
 import type { ServiceRegistry } from "@/controllers/ServiceRegistry";
-import type { Model } from "@/models/Model";
-import type { BaseHttpServer } from "@/network/http/BaseHttpServer";
-import { logger } from "@/utils/logger/logger";
+import { http_api_docs_prefix, http_api_prefix } from "@/network/http/create_base_http_server";
+import { base_logger, LoggerManager } from "@/utils/logger/logger";
 
 export class Controller {
-  constructor(
-    private model: Model,
-    private httpServer: BaseHttpServer,
-    private serviceRegistry: ServiceRegistry
-  ) {}
+  public readonly app: ReturnType<typeof create_http_app>;
+  private readonly logger = LoggerManager.get_base_logger().child({ name: "controller" });
+  private readonly port: number;
+  private readonly service_registry: ServiceRegistry;
+
+  constructor(port: number, service_registry: ServiceRegistry) {
+    this.port = port;
+    this.service_registry = service_registry;
+    this.app = create_http_app(service_registry);
+  }
 
   /**
    * Initializes the controller.
+   * Use this to setup all the connections, initial state, handler etc.
    */
   async init() {
-    logger.info("Initializing controller...");
-
-    const setupDatabasePromise = this.initializeDatabase();
-    const setupHttpServerPromise = this.initializeHttpServer();
-    const setupModelPromise = this.initializeModel();
-
-    RouteRegistry.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
-    await Promise.all([setupDatabasePromise, setupHttpServerPromise, setupModelPromise]).catch((err) =>
-      logger.error("Error while initializing controller: ", err)
-    );
+    this.logger.info("Initializing controller...");
   }
 
   async run() {
-    logger.info("Starting controller...");
+    this.logger.info("Starting controller...");
 
-    this.httpServer.listen();
-  }
-
-  private async initializeDatabase() {
-    logger.info("Initializing database...");
-    return this.serviceRegistry.db.init();
-  }
-
-  private async initializeHttpServer() {
-    logger.info("Initializing server http...");
-
-    // Registering all the routes:
-    logger.info("Setup http routes...");
-    RouteRegistry.setupRoutes(this.httpServer, this.model, this.serviceRegistry);
-  }
-
-  private async initializeModel() {
-    logger.info("Initializing model...");
-
-    // Create areas if they don't exist
-    const res = await this.serviceRegistry.db.drizzle.execute("SELECT 1 as test");
-    this.model.names.push(res.toString());
+    this.app.listen({ port: this.port }, (s) => {
+      this.logger.info(`Server started. Check documentation in ${s.url}${http_api_prefix}/${http_api_docs_prefix}`);
+    });
   }
 }

@@ -57,6 +57,7 @@ export class LoggerManager {
                 frequency: "daily",
                 size: "5K",
                 mkdir: true,
+              level: "trace",
               },
             }
           : {
@@ -66,9 +67,11 @@ export class LoggerManager {
                 mkdir: true,
                 colorize: false,
               },
+              level: "trace",
             },
         {
           target: "pino-pretty",
+          level: "trace",
         },
       ],
     });
@@ -79,6 +82,7 @@ export class LoggerManager {
             transaction_id: transaction_ctx.getStore()?.transaction_id,
           };
         },
+        level: process.env.LOG_LEVEL ?? "info",
         redact: ["*.password", "*.apikey", "machine_apikey"],
         name: "pino-logger",
         timestamp: pino.stdTimeFunctions.isoTime,

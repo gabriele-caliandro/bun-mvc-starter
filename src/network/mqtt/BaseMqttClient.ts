@@ -1,11 +1,11 @@
 import type { BaseMqttClientI } from "@/network/mqtt/BaseMqttClientI";
-import { logger as baseLogger } from "@/utils/logger/LoggerManager";
+import { base_logger } from "@/utils/logger/logger";
 import mqtt, { type ISubscriptionGrant, type MqttClient, type PacketCallback } from "mqtt";
 
 export type QoS = 0 | 1 | 2;
-const logger = baseLogger.child({ service: "mqtt" });
 
 export class BaseMqttClient<T extends Record<string, unknown> = Record<string, unknown>> implements BaseMqttClientI<T> {
+  private logger = base_logger.child({ name: "mqtt" });
   private client: MqttClient | null = null;
 
   private reconnectAttempts = 0;
@@ -31,15 +31,15 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
         // Wait for actual connection before resolving
         this.client.on("connect", () => {
           this.reconnectAttempts = 0;
-          logger.info("Connected to MQTT broker");
+          this.logger.info("Connected to MQTT broker");
           resolve();
         });
 
         this.client.on("error", (error) => {
-          logger.error(error, "MQTT error:");
-          logger.warn(`Retring to connect to MQTT broker in ${this.reconnectPeriod}ms`);
+          this.logger.error(error, "MQTT error:");
+          this.logger.warn(`Retring to connect to MQTT broker in ${this.reconnectPeriod}ms`);
           if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-            logger.error(`Max reconnection attempts (${this.maxReconnectAttempts}) reached`);
+            this.logger.error(`Max reconnection attempts (${this.maxReconnectAttempts}) reached`);
             this.client?.end(true);
             reject(error); // Fail fast on connection errors
           }
@@ -48,24 +48,24 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
         // Handle reconnection attempts
         this.client.on("reconnect", () => {
           this.reconnectAttempts++;
-          logger.info(`Reconnected to MQTT broker (attempt ${this.reconnectAttempts} / ${this.maxReconnectAttempts})`);
+          this.logger.info(`Reconnected to MQTT broker (attempt ${this.reconnectAttempts} / ${this.maxReconnectAttempts})`);
         });
 
         this.client.on("close", () => {
-          logger.warn("MQTT connection closed");
+          this.logger.warn("MQTT connection closed");
         });
 
         this.client.on("offline", () => {
-          logger.warn("MQTT client offline");
+          this.logger.warn("MQTT client offline");
         });
 
         this.client.on("message", (topic, payload) => {
           const content = JSON.parse(payload.toString());
-          logger.info({ payload: content }, `Topic "${topic}":`);
+          this.logger.info({ payload: content }, `Topic "${topic}":`);
           this.handleMessage(topic, payload.toString());
         });
       } catch (error) {
-        logger.error(error, "Failed to connect to MQTT broker:");
+        this.logger.error(error, "Failed to connect to MQTT broker:");
       }
     });
   }
@@ -83,7 +83,7 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
         try {
           handler(parsedMessage);
         } catch (error) {
-          logger.error(error, `Error in message handler for topic ${topic}:`);
+          this.logger.error(error, `Error in message handler for topic ${topic}:`);
         }
       });
     }
@@ -102,33 +102,33 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
       .subscribeAsync(topic.toString(), { qos: opts.qos })
       .then((granted) => {
         const grantedQos = granted?.at(0);
-        logger.info(`Subscribed to topic "${grantedQos?.topic}" with QoS ${grantedQos?.qos}`);
+        this.logger.info(`Subscribed to topic "${grantedQos?.topic}" with QoS ${grantedQos?.qos}`);
         this.messageHandlers.set(topic, []);
 
         callback?.(granted);
       })
       .catch((err) => {
-        logger.error({ error: err }, `Error subscribing to topic ${topic.toString()}`);
+        this.logger.error({ error: err }, `Error subscribing to topic ${topic.toString()}`);
       });
   }
 
   public onMessage<K extends keyof T>(topic: K, handler: (message: T[K]) => void): void {
     if (!this.messageHandlers.has(topic)) {
-      logger.warn(`Client not subscribed to topic '${topic.toString()}' yet. Autosubscribing topic '${topic.toString()}'`);
+      this.logger.warn(`Client not subscribed to topic '${topic.toString()}' yet. Autosubscribing topic '${topic.toString()}'`);
       this.messageHandlers.set(topic, []);
       this.subscribe(topic.toString());
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.messageHandlers.get(topic)!.push(handler as any);
-    logger.info(`Added consumer for topic '${topic.toString()}'`);
+    this.logger.info(`Added consumer for topic '${topic.toString()}'`);
   }
 
   async unsubscribe(topic: string, callback?: PacketCallback): Promise<void> {
     if (!this.client) throw new Error("Not connected");
     this.client.unsubscribe(topic, (err, packet) => {
-      logger.info(`Unsubscribed from topic "${topic}"`);
+      this.logger.info(`Unsubscribed from topic "${topic}"`);
       if (err) {
-        logger.error(err, `Error unsubscribing from topic "${topic}"`);
+        this.logger.error(err, `Error unsubscribing from topic "${topic}"`);
       }
       callback?.(err, packet);
     });

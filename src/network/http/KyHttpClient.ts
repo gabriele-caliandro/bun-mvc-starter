@@ -1,5 +1,5 @@
-import ky, { type KyInstance, type KyResponse } from "ky";
-import { logger as base_logger } from "@/utils/logger/logger";
+import { LoggerManager } from "@/utils/logger/logger";
+import ky, { type KyInstance } from "ky";
 import type { Logger } from "pino";
 
 type HttpClientOptions = {
@@ -10,19 +10,18 @@ type HttpClientOptions = {
   retry_limit?: number;
 };
 
-// TODO: Migrate the rest of the code to use this class
-export class HttpClient {
+export class KyHttpClient {
   public readonly ky: KyInstance;
   private logger: Logger;
 
   constructor(options: HttpClientOptions) {
-    this.logger = base_logger.child({ service: options.service_name });
+    this.logger = LoggerManager.get_base_logger().child({ name: options.service_name });
 
     this.ky = ky.create({
       prefixUrl: options.base_url,
       timeout: options.timeout_ms ?? 30_000,
       retry: {
-        limit: options.retry_limit ?? 2,
+        limit: options.retry_limit ?? 0,
         statusCodes: [408, 429, 500, 502, 503, 504],
       },
       headers: {

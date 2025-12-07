@@ -1,8 +1,8 @@
 import { get_error_message } from "@/utils/get-error-message";
-import { LoggerManager } from "@/utils/logger/LoggerManager";
+import { LoggerManager } from "@/utils/logger/logger";
 import Elysia from "elysia";
 
-const logger = LoggerManager.get_base_logger().child({ serivce: "http" });
+const logger = LoggerManager.get_base_logger().child({ name: "http" });
 export const logger_middleware = new Elysia({ name: "logger-middleware" })
   .derive(
     {

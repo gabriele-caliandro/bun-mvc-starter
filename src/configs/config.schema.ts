@@ -2,12 +2,8 @@ import z from "zod";
 
 const HttpConfigSchema = z.object({
   port: z.number().nullish(),
-  prefix: z.string().nullish(),
 });
 
-const HttpSererSchema = z.object({
-  url: z.string(),
-});
 const DatabaseConfigSchema = z.object({
   host: z.string(),
   port: z.number(),
@@ -15,16 +11,16 @@ const DatabaseConfigSchema = z.object({
   username: z.string(),
   password: z.string(),
 });
+
 const MqttConfigSchema = z.object({
   url: z.string(),
 });
 
 // Main Config Schema
 const ConfigSchema = z.object({
-  mqtt: MqttConfigSchema,
   http: HttpConfigSchema,
+  mqtt: MqttConfigSchema,
   database: DatabaseConfigSchema,
-  "user-manager-http-server": HttpSererSchema,
 });
 export default ConfigSchema;
 

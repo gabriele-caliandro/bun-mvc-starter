@@ -1,9 +1,9 @@
 import { get_error_message } from "@/utils/get-error-message";
-import { logger } from "@/utils/logger/logger";
+import { base_logger   } from "@/utils/logger/logger";
 import { MongoClient } from "mongodb";
 
 export class MongoConnection {
-  private logger = logger.child({ service: "mongo-database-connection" });
+  private logger = base_logger.child({ name: "mongo-database-connection" });
   public readonly client: MongoClient;
   private url: string;
   private db_name: string | null = null;

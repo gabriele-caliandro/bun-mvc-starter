@@ -1,17 +1,14 @@
 import { logger_middleware } from "@/network/http/middlewares/logger.middleware";
-<<<<<<< Updated upstream
-import { get_error_message } from "@/utils/get-error-message";
-import { logger } from "@/utils/logger/LoggerManager";
-=======
-import { version } from "@/version";
->>>>>>> Stashed changes
 import cors from "@elysiajs/cors";
-import { openapi } from "@elysiajs/openapi";
-import { Elysia } from "elysia";
+import openapi from "@elysiajs/openapi";
+import { version } from "bun";
+import Elysia from "elysia";
 import z from "zod";
 
-export const http_api_prefix = "loginautomation/interface/agilox/api" as const;
+export const http_api_prefix = "prefix" as const;
+export const http_api_docs_prefix = "docs" as const;
 type ApiPrefix = typeof http_api_prefix;
+
 export const create_base_http_server = () =>
   new Elysia<ApiPrefix>({
     prefix: http_api_prefix,
@@ -22,15 +19,15 @@ export const create_base_http_server = () =>
       openapi({
         documentation: {
           info: {
-            title: "Login Automation - Agilox Interface API",
-            description: "API for managing agilox through a more standardized, typesafe, REST-like method through Login Automation conventions",
+            title: "App API Documentation",
+            description: "App description",
             version: version,
           },
         },
         mapJsonSchema: {
           zod: z.toJSONSchema,
         },
-        path: "docs",
+        path: http_api_docs_prefix,
       })
     )
     .post("/health", () => ({ status: "ok" }), {

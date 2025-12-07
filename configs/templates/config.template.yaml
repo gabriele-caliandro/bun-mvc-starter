@@ -1,14 +1,9 @@
 # HTTP Server Configuration
 http:
   port: # Port to listen to.
-  prefix: # Prefix for the API. Default: ""
 
 mqtt:
   url: "mqtt://localhost:1883" # URL of the MQTT broker
-
-# User Manager Configuration
-user-manager-http-server:
-  url: # URL of the user manager
 
 # Database Configuration
 database:
