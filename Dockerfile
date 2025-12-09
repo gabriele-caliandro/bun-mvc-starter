@@ -1,4 +1,4 @@
-FROM oven/bun:1.2.21-alpine AS build
+FROM oven/bun:1.3.3 AS build
 WORKDIR /app
 
 # Cache packages installation
@@ -8,11 +8,17 @@ RUN bun install
 COPY . .
 
 ENV NODE_ENV=production
-RUN bun run build-binary
+RUN bun build \
+  --compile \
+  --minify-whitespace \
+  --target=bun-linux-x64 \
+  --minify-syntax \
+  --outfile server \
+  src/main.ts
 
 FROM gcr.io/distroless/base AS release
 WORKDIR /app
-COPY --from=build /app/build/server ./build/server
 ENV NODE_ENV=production
-CMD ["./build/server"]
+COPY --from=build /app/server ./server
+CMD ["/app/server"]
 EXPOSE 8080

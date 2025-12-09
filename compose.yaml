@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./logs:/app/logs
-      - ./config/config.yaml:/app/config/config.yaml
+      - ./configs/config.yaml:/app/configs/config.yaml
     logging:
       driver: "local"
       options:
