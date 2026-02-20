@@ -1,3 +1,4 @@
+import { error_handler } from "@/network/http/middlewares/error-handler.middleware";
 import { logger_middleware } from "@/network/http/middlewares/logger.middleware";
 import cors from "@elysiajs/cors";
 import openapi from "@elysiajs/openapi";
@@ -15,6 +16,7 @@ export const create_base_http_server = () =>
   })
     .use(cors())
     .use(logger_middleware)
+    .use(error_handler())
     .use(
       openapi({
         documentation: {

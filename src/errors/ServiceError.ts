@@ -19,4 +19,4 @@ import { ValidationError } from "@/errors/domain/ValidationError";
  *   }
  * }
  */
-export type ServiceError = NotFoundError | DatabaseError | ConflictError | ValidationError | BasicError;
+export type ServiceError = NotFoundError | DatabaseError | ConflictError | ValidationError | BasicError | Error;
