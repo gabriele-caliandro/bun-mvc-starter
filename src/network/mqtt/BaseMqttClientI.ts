@@ -1,5 +1,5 @@
 // src/network/mqtt/BaseMqttClientI.ts
-import type { ISubscriptionGrant, PacketCallback } from "mqtt";
+import type { ClientSubscribeCallback, PacketCallback } from "mqtt";
 import type { QoS } from "./BaseMqttClient";
 
 /**
@@ -37,8 +37,7 @@ export interface BaseMqttClientI<T extends Record<string, unknown> = Record<stri
    * @param callback - Optional callback when subscription is granted
    * @param opts - Subscription options (QoS level)
    * @throws Error if not connected
-   */
-  subscribe(topic: keyof T, callback?: (granted: ISubscriptionGrant[]) => void, opts?: { qos: QoS }): Promise<void>;
+   */ subscribe(topic: keyof T, opts?: { qos: QoS }, callback?: ClientSubscribeCallback): void;
 
   /**
    * Unsubscribe from a topic
@@ -54,5 +53,5 @@ export interface BaseMqttClientI<T extends Record<string, unknown> = Record<stri
    * @param topic - Topic to handle messages for (type-safe from T)
    * @param handler - Function to handle incoming messages (type-safe based on topic)
    */
-  onMessage<K extends keyof T>(topic: K, handler: (message: T[K]) => void): void;
+  on_message<K extends keyof T>(topic: K, handler: (message: T[K]) => void): void;
 }

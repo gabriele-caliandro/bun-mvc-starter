@@ -57,7 +57,7 @@ export class LoggerManager {
                 frequency: "daily",
                 size: "5K",
                 mkdir: true,
-              level: "trace",
+                level: "trace",
               },
             }
           : {

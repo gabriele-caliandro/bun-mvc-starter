@@ -79,3 +79,5 @@ generated
 
 # Finder (MacOS) folder config
 .DS_Store
+
+*.Zone.Identifier

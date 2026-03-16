@@ -1,4 +1,3 @@
-
 export interface Routine {
   name: string;
   start(interval_ms?: number): void;

@@ -1,4 +1,3 @@
-
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import type { Routine } from "@/utils/time/Routine";
 import { err, ok, type Result } from "neverthrow";
@@ -19,7 +18,7 @@ import { err, ok, type Result } from "neverthrow";
  *
  */
 export class RoutinesRegistry {
-  private readonly logger = LoggerManager.get_base_logger().child({name: "routines-registry"});
+  private readonly logger = LoggerManager.get_base_logger().child({ name: "routines-registry" });
   private readonly routines: Routine[] = [];
 
   /**

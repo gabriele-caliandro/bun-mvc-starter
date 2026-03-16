@@ -1,9 +1,8 @@
 /**
  * @type {import('prettier').Config}
- * @type {import('prettier-plugin-tailwindcss').PluginOptions}
  */
 const prettierConfig = {
-  plugins: ["prettier-plugin-tailwindcss"],
+  plugins: [],
   bracketSameLine: true,
   bracketSpacing: true,
   printWidth: 145,

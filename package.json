@@ -13,7 +13,6 @@
     "build": "bun build src/main.ts --target bun --outdir ./dist",
     "build-binary": "bun build --compile --sourcemap --minify-whitespace --minify-syntax --target bun --outfile build/server src/main.ts",
     "start": "NODE_ENV=production bun dist/main.js",
-    "start-binary": "./build/server",
     "test:unit": "bunx vitest run",
     "test:integration": "bun run db:test:down && bun run db:test:up && bunx vitest run --config vitest.config.integration.ts && bun run db:test:down",
     "knip": "knip"
@@ -45,6 +44,7 @@
     "drizzle-orm": "0.43.1",
     "elysia": "^1.4.16",
     "ky": "^1.14.0",
+    "mongo": "^0.1.0",
     "mqtt": "^5.14.1",
     "neverthrow": "^8.2.0",
     "pino": "^10.1.0",

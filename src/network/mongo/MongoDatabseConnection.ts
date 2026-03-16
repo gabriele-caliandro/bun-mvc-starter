@@ -1,5 +1,5 @@
 import { get_error_message } from "@/utils/get-error-message";
-import { base_logger   } from "@/utils/logger/logger";
+import { base_logger } from "@/utils/logger/logger";
 import { MongoClient } from "mongodb";
 
 export class MongoConnection {
@@ -22,7 +22,7 @@ export class MongoConnection {
     this.client.on("close", () => {
       this.logger.info(`Mongo client disconnected from ${this.url} `);
     });
-    this.client.on("error", (err) => {
+    this.client.on("error", (err: unknown) => {
       this.logger.error(`Mongo client error: ${get_error_message(err)}`);
     });
   }

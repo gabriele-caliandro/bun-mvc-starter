@@ -20,7 +20,6 @@ export class IntervalScheduler {
       this.timer = setTimeout(execute_and_reschedule, this.interval_ms);
     };
 
-    this.timer = setTimeout(execute_and_reschedule, this.interval_ms);
     execute_and_reschedule();
   }
 

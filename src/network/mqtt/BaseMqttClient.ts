@@ -1,6 +1,6 @@
 import type { BaseMqttClientI } from "@/network/mqtt/BaseMqttClientI";
 import { base_logger } from "@/utils/logger/logger";
-import mqtt, { type ISubscriptionGrant, type MqttClient, type PacketCallback } from "mqtt";
+import mqtt, { type ClientSubscribeCallback, type MqttClient, type PacketCallback } from "mqtt";
 
 export type QoS = 0 | 1 | 2;
 
@@ -62,7 +62,7 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
         this.client.on("message", (topic, payload) => {
           const content = JSON.parse(payload.toString());
           this.logger.info({ payload: content }, `Topic "${topic}":`);
-          this.handleMessage(topic, payload.toString());
+          this.handle_message(topic, payload.toString());
         });
       } catch (error) {
         this.logger.error(error, "Failed to connect to MQTT broker:");
@@ -70,7 +70,7 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
     });
   }
 
-  private handleMessage(topic: string, message: string): void {
+  private handle_message(topic: string, message: string): void {
     const handlers = this.messageHandlers.get(topic as keyof T);
     if (handlers) {
       let parsedMessage: T[keyof T];
@@ -95,31 +95,27 @@ export class BaseMqttClient<T extends Record<string, unknown> = Record<string, u
     this.client.publish(topic.toString(), JSON.stringify(message), { qos: opts.qos });
   }
 
-  async subscribe(topic: keyof T, callback?: (granted: ISubscriptionGrant[]) => void, opts: { qos: QoS } = { qos: 0 }): Promise<void> {
+  subscribe(topic: keyof T, opts: { qos: QoS } = { qos: 0 }, callback?: ClientSubscribeCallback): void {
     if (!this.client) throw new Error("Not connected");
 
-    await this.client
-      .subscribeAsync(topic.toString(), { qos: opts.qos })
-      .then((granted) => {
-        const grantedQos = granted?.at(0);
-        this.logger.info(`Subscribed to topic "${grantedQos?.topic}" with QoS ${grantedQos?.qos}`);
-        this.messageHandlers.set(topic, []);
-
-        callback?.(granted);
-      })
-      .catch((err) => {
-        this.logger.error({ error: err }, `Error subscribing to topic ${topic.toString()}`);
-      });
+    this.client.subscribe(topic.toString(), { qos: opts.qos }, (err, granted) => {
+      callback?.(err, granted);
+      const grantedQos = granted?.at(0);
+      this.logger.info(`Subscribed to topic "${grantedQos?.topic}" with QoS ${grantedQos?.qos}`);
+    });
   }
 
-  public onMessage<K extends keyof T>(topic: K, handler: (message: T[K]) => void): void {
+  public on_message<K extends keyof T>(topic: K, handler: (message: T[K]) => void): void {
     if (!this.messageHandlers.has(topic)) {
       this.logger.warn(`Client not subscribed to topic '${topic.toString()}' yet. Autosubscribing topic '${topic.toString()}'`);
-      this.messageHandlers.set(topic, []);
       this.subscribe(topic.toString());
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.messageHandlers.get(topic)!.push(handler as any);
+    let handlers = this.messageHandlers.get(topic);
+    if (handlers == null) {
+      handlers = [];
+      this.messageHandlers.set(topic, handlers);
+    }
+    handlers.push((message) => handler(message as T[K]));
     this.logger.info(`Added consumer for topic '${topic.toString()}'`);
   }
 
