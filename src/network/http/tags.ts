@@ -3,4 +3,8 @@ export const TAGS = {
     name: "Tag example title",
     description: "Description",
   },
+  AUTH: {
+    name: "Authentication",
+    description: "Authentication",
+  },
 } as const;

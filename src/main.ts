@@ -3,6 +3,7 @@ import { Controller } from "@/controllers/Controller";
 import { DatabaseManager } from "@/database/DatabaseManager";
 import { BaseMqttClient } from "@/network/mqtt/BaseMqttClient";
 import { _rootdir } from "@/root-dir";
+import { AuthService } from "@/services/AuthService";
 import { base_logger } from "@/utils/logger/logger";
 import { version } from "@/version";
 import { join } from "path";
@@ -46,9 +47,13 @@ async function main() {
   const mqtt = new BaseMqttClient(service, config.mqtt.url);
 
   const DEFAULT_PORT = 8080;
+
+  const auth_service = new AuthService([], config.auth.secret);
+
   const controller = new Controller(config.http.port ?? DEFAULT_PORT, {
     db,
     mqtt,
+    auth_service,
   });
 
   try {

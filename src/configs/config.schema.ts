@@ -21,6 +21,10 @@ const ConfigSchema = z.object({
   http: HttpConfigSchema,
   mqtt: MqttConfigSchema,
   database: DatabaseConfigSchema,
+
+  auth: z.object({
+    secret: z.string(),
+  }),
 });
 export default ConfigSchema;
 
