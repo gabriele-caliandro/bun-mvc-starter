@@ -1,4 +1,4 @@
-import { FifoQueue } from "@/utils/queues/FifoQueue";
+import { Queue } from "@/utils/queues/Queue";
 import { err, ok, type Result } from "neverthrow";
 
 export class MutexTimoutError extends Error {
@@ -32,7 +32,7 @@ export class Mutex {
   private DEFAULT_TIMEOUT = 5_000;
 
   private owner: string | null = null;
-  private awakers = new FifoQueue<() => void>();
+  private awakers = new Queue<() => void>();
 
   constructor() {}
 
