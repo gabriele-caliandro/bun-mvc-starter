@@ -16,7 +16,7 @@ export class FifoQueue<T> {
     }
   }
 
-  push(el: T) {
+  enqueue(el: T) {
     this.queue.push(el);
   }
 }

@@ -32,7 +32,7 @@ export class Mutex {
   private DEFAULT_TIMEOUT = 5_000;
 
   private owner: string | null = null;
-  private waiters = new FifoQueue<() => void>();
+  private awakers = new FifoQueue<() => void>();
 
   constructor() {}
 
@@ -59,9 +59,9 @@ export class Mutex {
   unlock(owner: string) {
     if (this.owner !== owner) return;
     this.owner = null;
-    const oltest_waiter = this.waiters.dequeue();
-    if (oltest_waiter != null) {
-      oltest_waiter();
+    const wakeup_oldest = this.awakers.dequeue();
+    if (wakeup_oldest != null) {
+      wakeup_oldest();
     }
   }
 
@@ -70,11 +70,11 @@ export class Mutex {
 
     const promise = new Promise<Result<void, MutexTimoutError>>((res) => {
       const awake = () => res(ok());
-      this.waiters.push(awake);
+      this.awakers.enqueue(awake);
 
       if (opts?.timeout !== false) {
         setTimeout(() => {
-          this.waiters.remove(awake);
+          this.awakers.remove(awake);
           res(err(new MutexTimoutError({ actor: owner })));
         }, opts?.timeout ?? this.DEFAULT_TIMEOUT);
       }
