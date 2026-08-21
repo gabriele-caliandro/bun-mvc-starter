@@ -33,7 +33,7 @@ import { PaginationMetaSchema } from "@/api/schemas/common.schema";
 import { query_boolean, query_number, query_string_array } from "@/utils/schema-validator/query-params";
 import { z } from "zod";
 
-// 1. The entity as read back from the service
+// 1. The entity as read back from the service — the one place every field is documented
 export const OrderSchema = z
   .object({
     code: z.string().meta({ description: "Unique identifier for the order" }),
@@ -47,10 +47,11 @@ export const OrderSchema = z
 export type Order = z.infer<typeof OrderSchema>;
 
 // 2. Creation input (fields the caller provides; server-generated fields absent or optional)
+//    Bare fields: same meaning as on Order. Only `code` gets a description — it says something new.
 export const NewOrderSchema = z
   .object({
     code: z.string().optional().meta({ description: "Order code; generated when omitted" }),
-    description: z.string().optional().meta({ description: "Human-readable description of the order" }),
+    description: z.string().optional(),
   })
   .meta({ title: "NewOrder", description: "Payload to create an order" });
 export type NewOrder = z.infer<typeof NewOrderSchema>;
@@ -58,22 +59,23 @@ export type NewOrder = z.infer<typeof NewOrderSchema>;
 // 3. Update input: every field optional, at least one required
 export const UpdateOrderSchema = z
   .object({
-    description: z.string().nullable().optional().meta({ description: "Human-readable description of the order" }),
-    status: z.enum(["OPEN", "SHIPPED", "CANCELLED"]).optional().meta({ description: "Current lifecycle status" }),
+    description: z.string().nullable().optional().meta({ description: "Pass `null` to clear the description" }),
+    status: z.enum(["OPEN", "SHIPPED", "CANCELLED"]).optional(),
   })
   .refine((data) => Object.values(data).some((v) => v !== undefined), {
     message: "At least one field must be provided",
   })
-  .meta({ title: "UpdateOrder", description: "Fields to update for an order" });
+  .meta({ title: "UpdateOrder", description: "Fields to update for an order; omitted fields are left untouched" });
 export type UpdateOrder = z.infer<typeof UpdateOrderSchema>;
 
 // 4. List filters — built with query_* helpers so the schema works directly as an Elysia `query` schema
+//    Only the fields that are NOT plain Order fields need a description.
 export const OrderFiltersSchema = z
   .object({
-    codes: query_string_array().optional().meta({ description: "Filter by order codes" }),
+    codes: query_string_array().optional(),
+    status: z.enum(["OPEN", "SHIPPED", "CANCELLED"]).optional(),
     q: z.string().optional().meta({ description: "Fuzzy search text (matches against code)" }),
-    status: z.enum(["OPEN", "SHIPPED", "CANCELLED"]).optional().meta({ description: "Filter by status" }),
-    is_urgent: query_boolean().optional().meta({ description: "Filter by urgency flag" }),
+    is_urgent: query_boolean().optional().meta({ description: "Only orders flagged urgent by the warehouse" }),
     page: query_number().optional().meta({ description: "Page number (default 1)" }),
     page_size: query_number().optional().meta({ description: "Page size (default 50, max 500)" }),
   })
@@ -90,7 +92,13 @@ export type PaginatedOrders = z.infer<typeof PaginatedOrdersSchema>;
 
 Rules:
 
-- Every schema: `.meta({ title, description })`. Every field: `.meta({ description })`. These feed Swagger directly.
+- Every schema gets `.meta({ title, description })` — that's what names it in Swagger. Make the schema-level description carry the contract of the whole payload ("omitted fields are left untouched"), so individual fields don't have to.
+- **Per-field descriptions live on the entity schema only.** The entity schema (`OrderSchema`) documents every field. `New*`, `Update*` and `*Filters` are still written out by hand, but their fields stay **bare** when they mean the same thing as on the entity — a reader gets the semantics from `Order`. Repeating "Human-readable description of the order" four times bloats the DTO and adds nothing to the generated docs.
+- Add a `.meta({ description })` on an input-schema field **only when it says something the entity schema doesn't**:
+  - the field doesn't exist on the entity (`q`, `page`, `page_size`, a filter-only flag);
+  - its behaviour differs here (`code` is generated when omitted, `null` clears a value, a filter matches a range rather than an exact value);
+  - the filter's semantics aren't obvious from the name (`codes` filtering on `code` is obvious; `since` is not).
+- Never write a description that just restates the field name (`status` → "The status of the order"). If that's all there is to say, leave the field bare — including on the entity schema.
 - Every schema exports its inferred type via `z.infer` right below it. Plain TS types without a schema are fine only for internal, never-validated shapes (e.g. an `Update*` used only service-side).
 - Semantics: **`nullable`** = the value can be `null` in the data; **`optional`** = the key may be absent from the payload. Update schemas typically need `.nullable().optional()` (absent = don't touch, `null` = clear).
 - Reference other entities by their key type: `customer_code: z.string()` in the schema, `Order["code"]` in function signatures.
@@ -107,6 +115,8 @@ export const OrderApiResponseSchema = OrderSchema.extend({
 export type OrderApiResponse = z.infer<typeof OrderApiResponseSchema>;
 ```
 
+The extended field is new, so it carries its own description; the inherited ones keep theirs from `OrderSchema`.
+
 If the **service** already returns that shape, the type belongs in the DTO file instead, under its own name. Either way: the shape is named once and reused — never repeat anonymous intersections like `Order & { display_color: string | null }` across method signatures.
 
 ## Variant entities (discriminated unions)
@@ -117,12 +127,13 @@ Entities with typed variants (constraint kinds, strategy kinds) define per-varia
 export const ConstraintSchema = z.discriminatedUnion("type", [MaxDwellTimeConstraintSchema, MinAgingConstraintSchema]);
 ```
 
-The same union treatment applies to their `New*` and input schemas. See the `add-service` skill (factory + strategy) for the implementation side.
+The same union treatment applies to their `New*` and input schemas. Document each variant's fields on the variant's own entity schema; the `New*` variants follow the bare-field rule above.
 
 ## Checklist when a field is added or renamed
 
 1. Table column (`add-db-table` skill) — if it's stored
 2. DTO schema(s): entity? New? Update? Filters? — each is a separate decision
-3. Service projection/mapping updated (compiler will point at the explicit `.select`/mapping)
-4. API schema extension, if the field is API-only
-5. `with_models` registration still accurate (new schemas registered)
+3. Description written **once**, on the entity schema (input schemas only if the field is input-only or behaves differently there)
+4. Service projection/mapping updated (compiler will point at the explicit `.select`/mapping)
+5. API schema extension, if the field is API-only
+6. `with_models` registration still accurate (new schemas registered)
