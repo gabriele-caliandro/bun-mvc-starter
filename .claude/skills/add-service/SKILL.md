@@ -42,12 +42,13 @@ export class OrdersService implements OrdersServiceI {
   - Domain errors in `src/errors/domain/`: `NotFoundError` (404), `ConflictError` (409), `DatabaseError` (500), `InternalError` (500), `ValidationError`, …
 - Canonical mappings:
   - Row not found → `err(new NotFoundError("Order", code))` — **never** `InternalError` for a miss.
-  - Unique violation on insert → `err(new ConflictError(...))`. Detect via the postgres error code, not message sniffing:
+  - Unique violation on insert → `err(new ConflictError(...))`. Detect via the postgres error code through a **named constants struct** — never a magic number inline and never message sniffing:
     ```ts
-    // ✅  (error as { code?: string })?.code === "23505"
-    // ❌  error_message.includes("duplicate key value")
+    // ✅  is_pg_error(error, PG_ERROR_CODES.UNIQUE_VIOLATION)
+    // ❌  (error as { code?: string }).code === "23505"   // magic number
+    // ❌  error_message.includes("duplicate key value")   // message sniffing
     ```
-    If the repo has an `is_unique_violation(error)` util, use it; if not, create one in `src/utils/`.
+    If the repo has a `pg-errors` util, use it; if not, create one in `src/utils/` (see the reference file for the struct + helper).
   - Anything else caught at the boundary → `err(new DatabaseError("Failed to <do X>", error))`, after logging with the scoped logger.
 - Compose with `.map() / .mapErr() / .andThen()`; propagate with early `if (x.isErr()) return err(x.error)`.
 
@@ -79,6 +80,23 @@ export class OrdersService implements OrdersServiceI {
 
 - Multi-join / CTE / aggregate queries do **not** live inline in service methods. Each goes in `queries/query_<name>.ts` as a function `(db) => query` that returns an unexecuted Drizzle query.
 - Query functions compose: a query can wrap another via `db.$with("name").as(other_query(db))` (CTE). Keep them pure query builders — no error handling, no mapping; the service executes them and owns the Result.
+- **Alias every column in multi-table/CTE selects.** Drizzle's query builder can emit the *same* result column name for two different fields coming from different tables or CTEs (e.g. two `code` columns), silently clobbering one. Give every selected field an explicit prefixed alias via an `aliased_column` helper, and pin the projection shape with `satisfies`:
+
+  ```ts
+  // src/utils/drizzle/aliased_column.ts
+  import { type AnyColumn, type GetColumnData, type SQL } from "drizzle-orm";
+
+  export const aliased_column = <T extends AnyColumn>(column: T, alias: string): SQL.Aliased<GetColumnData<T>> =>
+    column.getSQL().mapWith(column.mapFromDriverValue).as(alias);
+  ```
+
+  ```ts
+  .select({
+    order_code: aliased_column(orders.code, "order_code"),
+    customer_code: aliased_column(customers.code, "customer_code"),
+    line_quantity: lines_cte.quantity, // CTE columns are already named at the CTE boundary
+  } satisfies Record<keyof FlatOrderRow, unknown>)
+  ```
 
 ## Pluggable variants — factory + strategy
 
@@ -92,7 +110,8 @@ When a domain has open-ended variants (constraint types, allocation strategies, 
 ## Logging
 
 - Scoped logger per file: `const logger = LoggerManager.get_logger()` (or `createLogger({ service: "orders" })` where the repo uses scoped creation).
-- Log at the error boundary with structured metadata: `logger.error({ error: get_error_message(error), code }, "Failed to add order")`. Don't log-and-rethrow up the stack — one log per failure, at the boundary that caught it.
+- Log at the error boundary with structured metadata: `logger.error({ error: get_error_details(error), code }, "Failed to add order")`. Don't log-and-rethrow up the stack — one log per failure, at the boundary that caught it.
+- **Log the stack, not just the message.** Error logs must include the stack trace when one exists. If the repo's error helper only extracts `.message` (a common legacy `get_error_message`), add/use a `get_error_details(error)` that returns message + stack (see the reference file) and use it in `logger.error` calls.
 
 ## Wiring checklist
 

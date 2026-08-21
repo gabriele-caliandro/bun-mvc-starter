@@ -32,8 +32,8 @@ import { DatabaseError } from "@/errors/domain/DatabaseError";
 import { NotFoundError } from "@/errors/domain/NotFoundError";
 import type { NewOrder, Order, OrderFilters, PaginatedOrders, UpdateOrder } from "@/services/orders/dto/Order";
 import type { OrdersServiceI } from "@/services/orders/OrdersServiceI";
-import { get_error_message } from "@/utils/get-error-message";
-import { is_unique_violation } from "@/utils/is-unique-violation";
+import { get_error_details } from "@/utils/get-error-details";
+import { is_pg_error, PG_ERROR_CODES } from "@/utils/pg-errors";
 import { LoggerManager } from "@/utils/logger/LoggerManager";
 import { and, count, eq, ilike, inArray } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -70,10 +70,10 @@ export class OrdersService implements OrdersServiceI {
         status: inserted[0].status,
       });
     } catch (error) {
-      if (is_unique_violation(error)) {
+      if (is_pg_error(error, PG_ERROR_CODES.UNIQUE_VIOLATION)) {
         return err(new ConflictError(`Order with code '${new_order.code}' already exists`));
       }
-      logger.error({ error: get_error_message(error), code: new_order.code }, "Failed to add order");
+      logger.error({ error: get_error_details(error), code: new_order.code }, "Failed to add order");
       return err(new DatabaseError("Failed to add order to database", error));
     }
   }
@@ -95,7 +95,7 @@ export class OrdersService implements OrdersServiceI {
 
       return ok(rows[0]);
     } catch (error) {
-      logger.error({ error: get_error_message(error), code }, "Failed to retrieve order");
+      logger.error({ error: get_error_details(error), code }, "Failed to retrieve order");
       return err(new DatabaseError("Failed to retrieve order from database", error));
     }
   }
@@ -139,7 +139,7 @@ export class OrdersService implements OrdersServiceI {
         },
       });
     } catch (error) {
-      logger.error({ error: get_error_message(error) }, "Failed to retrieve orders");
+      logger.error({ error: get_error_details(error) }, "Failed to retrieve orders");
       return err(new DatabaseError("Failed to retrieve orders from database", error));
     }
   }
@@ -166,7 +166,7 @@ export class OrdersService implements OrdersServiceI {
         status: updated[0].status,
       });
     } catch (error) {
-      logger.error({ error: get_error_message(error), code }, "Failed to update order");
+      logger.error({ error: get_error_details(error), code }, "Failed to update order");
       return err(new DatabaseError("Failed to update order in database", error));
     }
   }
@@ -181,7 +181,7 @@ export class OrdersService implements OrdersServiceI {
 
       return ok(undefined);
     } catch (error) {
-      logger.error({ error: get_error_message(error), code }, "Failed to delete order");
+      logger.error({ error: get_error_details(error), code }, "Failed to delete order");
       return err(new DatabaseError("Failed to delete order from database", error));
     }
   }
@@ -205,11 +205,47 @@ export const query_get_open_order_codes = (db: PostgresJsDatabase<Record<string,
   db.select({ code: orders.code }).from(orders).where(eq(orders.status, "OPEN"));
 ```
 
-## Unique-violation util (create once per repo if missing)
+## Postgres error codes util (create once per repo if missing)
+
+Named struct instead of magic numbers scattered through services; extend it as new codes are needed.
 
 ```ts
-// src/utils/is-unique-violation.ts
-/** Postgres error class 23505 = unique_violation. Prefer this over sniffing the error message. */
-export const is_unique_violation = (error: unknown): boolean =>
-  typeof error === "object" && error !== null && (error as { code?: string }).code === "23505";
+// src/utils/pg-errors.ts
+
+/** PostgreSQL error codes (https://www.postgresql.org/docs/current/errcodes-appendix.html) */
+export const PG_ERROR_CODES = {
+  UNIQUE_VIOLATION: "23505",
+  FOREIGN_KEY_VIOLATION: "23503",
+  NOT_NULL_VIOLATION: "23502",
+  CHECK_VIOLATION: "23514",
+} as const;
+export type PgErrorCode = (typeof PG_ERROR_CODES)[keyof typeof PG_ERROR_CODES];
+
+/** True when `error` is a postgres driver error carrying the given code. */
+export const is_pg_error = (error: unknown, code: PgErrorCode): boolean =>
+  typeof error === "object" && error !== null && (error as { code?: string }).code === code;
+```
+
+## Error details util (message + stack, create once per repo if missing)
+
+Logs must carry the stack trace, not just the message.
+
+```ts
+// src/utils/get-error-details.ts
+
+/**
+ * Extracts message and stack from an unknown error for structured logging.
+ * Prefer this over message-only helpers: without the stack, production logs
+ * tell you what failed but not where.
+ */
+export const get_error_details = (error: unknown): { message: string; stack?: string } => {
+  if (error instanceof Error) {
+    return { message: error.message, stack: error.stack };
+  }
+  try {
+    return { message: JSON.stringify(error, null, 2) };
+  } catch {
+    return { message: String(error) };
+  }
+};
 ```
