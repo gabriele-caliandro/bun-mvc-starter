@@ -1,5 +1,9 @@
 import type { Queue } from "@/utils/queues/Queue";
 
+/**
+ * NOTE: single-consumer only. Concurrent `take()` calls overwrite `wake`,
+ * leaving earlier waiters stuck forever.
+ */
 export class BlockingQueue<T = unknown> {
   private wake: (() => void) | null = null;
 
@@ -18,12 +22,6 @@ export class BlockingQueue<T = unknown> {
       const feedback_promise = new Promise<void>((resolve) => {
         this.wake = resolve;
       });
-
-      // If in the meantime a new event
-      if (!this.queue.is_empty()) {
-        this.wake = null;
-        continue;
-      }
 
       await feedback_promise;
       this.wake = null;
